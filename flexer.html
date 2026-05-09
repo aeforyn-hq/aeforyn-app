@@ -1,0 +1,1932 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Flexer — Creator Security HQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,400&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:        #080B14;
+  --bg2:       #0D1220;
+  --bg3:       #111827;
+  --card:      #131B2E;
+  --card2:     #1A2540;
+  --border:    #1E2D4A;
+  --border2:   #253558;
+  --accent:    #00E5FF;
+  --accent2:   #0097A7;
+  --gold:      #FFB800;
+  --danger:    #FF3D5A;
+  --warn:      #FF8C00;
+  --ok:        #00E676;
+  --text:      #E8EDF7;
+  --text2:     #8B9DBF;
+  --text3:     #4A5878;
+  --mono:      'DM Mono', monospace;
+  --sans:      'Instrument Sans', sans-serif;
+  --display:   'Syne', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--sans);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── NOISE OVERLAY ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.4;
+}
+
+/* ══ SPLASH / LOGIN SCREEN ══════════════════════════════════════ */
+#splash{
+  position:fixed;inset:0;
+  background:var(--bg);
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  z-index:999;
+  gap:0;
+}
+#splash::after{
+  content:'';
+  position:absolute;
+  width:600px;height:600px;
+  background:radial-gradient(circle, rgba(0,229,255,.07) 0%, transparent 70%);
+  pointer-events:none;
+}
+.splash-logo{
+  font-family:var(--display);
+  font-size:72px;
+  font-weight:800;
+  letter-spacing:-3px;
+  color:var(--text);
+  line-height:1;
+  margin-bottom:8px;
+  animation: fadeUp .8s ease both;
+}
+.splash-logo span{color:var(--accent);}
+.splash-tag{
+  font-family:var(--mono);
+  font-size:13px;
+  color:var(--text2);
+  letter-spacing:4px;
+  text-transform:uppercase;
+  margin-bottom:56px;
+  animation: fadeUp .8s .15s ease both;
+}
+.splash-form{
+  display:flex;flex-direction:column;
+  gap:14px;
+  width:340px;
+  animation: fadeUp .8s .3s ease both;
+}
+.splash-form input{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:14px 18px;
+  font-family:var(--sans);
+  font-size:14px;
+  color:var(--text);
+  outline:none;
+  transition:border .2s;
+}
+.splash-form input:focus{border-color:var(--accent);}
+.splash-form input::placeholder{color:var(--text3);}
+.btn-primary{
+  background:var(--accent);
+  color:var(--bg);
+  border:none;
+  border-radius:10px;
+  padding:14px 18px;
+  font-family:var(--display);
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:.5px;
+  cursor:pointer;
+  transition:all .2s;
+  margin-top:4px;
+}
+.btn-primary:hover{background:#33EAFF;transform:translateY(-1px);}
+.splash-skip{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--text3);
+  margin-top:20px;
+  cursor:pointer;
+  text-decoration:underline;
+  animation: fadeUp .8s .45s ease both;
+}
+.splash-skip:hover{color:var(--text2);}
+
+/* ══ APP SHELL ═══════════════════════════════════════════════════ */
+#app{display:none;min-height:100vh;position:relative;z-index:1;}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  position:fixed;left:0;top:0;bottom:0;
+  width:240px;
+  background:var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  padding:28px 0;
+  z-index:100;
+}
+.sidebar-logo{
+  font-family:var(--display);
+  font-size:28px;
+  font-weight:800;
+  color:var(--text);
+  padding:0 24px 32px;
+  letter-spacing:-1px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:20px;
+}
+.sidebar-logo span{color:var(--accent);}
+.nav-section{
+  font-family:var(--mono);
+  font-size:10px;
+  letter-spacing:3px;
+  color:var(--text3);
+  padding:0 24px 10px;
+  text-transform:uppercase;
+}
+.nav-item{
+  display:flex;align-items:center;gap:12px;
+  padding:11px 24px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:500;
+  color:var(--text2);
+  transition:all .15s;
+  position:relative;
+  border-left:2px solid transparent;
+}
+.nav-item:hover{background:var(--card);color:var(--text);}
+.nav-item.active{
+  background:linear-gradient(90deg, rgba(0,229,255,.08) 0%, transparent 100%);
+  color:var(--accent);
+  border-left-color:var(--accent);
+}
+.nav-item .icon{font-size:16px;width:20px;text-align:center;}
+.nav-badge{
+  margin-left:auto;
+  background:var(--danger);
+  color:#fff;
+  font-family:var(--mono);
+  font-size:10px;
+  padding:2px 7px;
+  border-radius:20px;
+  font-weight:500;
+}
+.nav-badge.warn{background:var(--warn);}
+.nav-badge.ok{background:var(--ok);color:var(--bg);}
+.sidebar-bottom{
+  margin-top:auto;
+  padding:20px 24px 0;
+  border-top:1px solid var(--border);
+}
+.user-pill{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 12px;
+  background:var(--card);
+  border-radius:10px;
+  cursor:pointer;
+}
+.user-avatar{
+  width:32px;height:32px;
+  border-radius:50%;
+  background:linear-gradient(135deg, var(--accent), #0040FF);
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--bg);
+  font-family:var(--display);
+}
+.user-name{font-size:13px;font-weight:600;}
+.user-plan{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:1px;}
+
+/* ── MAIN CONTENT ── */
+.main{
+  margin-left:240px;
+  padding:36px 40px;
+  min-height:100vh;
+}
+.page{display:none;}
+.page.active{display:block;}
+
+/* ── TOP BAR ── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:36px;
+}
+.page-title{
+  font-family:var(--display);
+  font-size:26px;
+  font-weight:700;
+  letter-spacing:-.5px;
+}
+.page-sub{font-size:13px;color:var(--text2);margin-top:3px;}
+.topbar-right{display:flex;align-items:center;gap:12px;}
+.topbar-btn{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:9px;
+  padding:9px 16px;
+  font-size:13px;
+  font-family:var(--sans);
+  color:var(--text2);
+  cursor:pointer;
+  transition:all .15s;
+  display:flex;align-items:center;gap:7px;
+}
+.topbar-btn:hover{border-color:var(--border2);color:var(--text);}
+.alert-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--danger);
+  animation:pulse 2s infinite;
+}
+
+/* ── CARDS ── */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:24px;
+}
+.card-title{
+  font-family:var(--display);
+  font-size:14px;
+  font-weight:700;
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  color:var(--text2);
+  margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-title a{
+  font-family:var(--mono);
+  font-size:11px;
+  color:var(--accent);
+  cursor:pointer;
+  font-weight:400;
+  text-transform:none;
+  letter-spacing:0;
+  text-decoration:none;
+}
+.card-title a:hover{text-decoration:underline;}
+
+/* ── STAT GRID ── */
+.stat-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:16px;
+  margin-bottom:28px;
+}
+.stat-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:22px 20px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .2s;
+}
+.stat-card:hover{border-color:var(--border2);}
+.stat-card::after{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+}
+.stat-card.danger::after{background:var(--danger);}
+.stat-card.warn::after{background:var(--warn);}
+.stat-card.ok::after{background:var(--ok);}
+.stat-card.info::after{background:var(--accent);}
+.stat-label{font-size:12px;color:var(--text2);margin-bottom:10px;font-family:var(--mono);letter-spacing:.5px;}
+.stat-val{
+  font-family:var(--display);
+  font-size:36px;
+  font-weight:800;
+  line-height:1;
+  margin-bottom:6px;
+}
+.stat-val.danger{color:var(--danger);}
+.stat-val.warn{color:var(--warn);}
+.stat-val.ok{color:var(--ok);}
+.stat-val.info{color:var(--accent);}
+.stat-delta{font-size:12px;color:var(--text3);}
+.stat-icon{
+  position:absolute;right:16px;top:50%;transform:translateY(-50%);
+  font-size:28px;opacity:.12;
+}
+
+/* ── SECURITY SCORE RING ── */
+.score-wrap{display:flex;align-items:center;gap:32px;}
+.score-ring-wrap{position:relative;width:140px;height:140px;flex-shrink:0;}
+.score-ring-wrap svg{transform:rotate(-90deg);}
+.score-center{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  pointer-events:none;
+}
+.score-num{
+  font-family:var(--display);
+  font-size:36px;font-weight:800;
+  color:var(--ok);
+  line-height:1;
+}
+.score-label{font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;}
+.score-breakdown{flex:1;}
+.score-row{
+  display:flex;align-items:center;gap:10px;
+  margin-bottom:12px;
+}
+.score-row-label{font-size:13px;color:var(--text2);width:160px;}
+.score-bar-bg{
+  flex:1;height:5px;
+  background:var(--bg3);
+  border-radius:4px;overflow:hidden;
+}
+.score-bar-fill{height:100%;border-radius:4px;transition:width 1s ease;}
+.score-row-val{font-family:var(--mono);font-size:12px;width:32px;text-align:right;}
+
+/* ── THREAT FEED ── */
+.threat-item{
+  display:flex;align-items:flex-start;gap:14px;
+  padding:14px 0;
+  border-bottom:1px solid var(--border);
+}
+.threat-item:last-child{border-bottom:none;}
+.threat-dot{
+  width:8px;height:8px;border-radius:50%;
+  margin-top:5px;flex-shrink:0;
+}
+.threat-dot.high{background:var(--danger);box-shadow:0 0 8px var(--danger);}
+.threat-dot.med{background:var(--warn);box-shadow:0 0 8px var(--warn);}
+.threat-dot.low{background:var(--ok);}
+.threat-body{flex:1;}
+.threat-title{font-size:13px;font-weight:600;margin-bottom:3px;}
+.threat-desc{font-size:12px;color:var(--text2);line-height:1.5;}
+.threat-meta{
+  display:flex;align-items:center;gap:8px;margin-top:6px;
+}
+.threat-platform{
+  font-family:var(--mono);font-size:10px;
+  background:var(--bg3);
+  padding:3px 8px;border-radius:4px;
+  color:var(--text2);
+}
+.threat-time{font-family:var(--mono);font-size:10px;color:var(--text3);}
+.threat-badge{
+  font-family:var(--mono);font-size:10px;
+  padding:3px 8px;border-radius:4px;
+  font-weight:500;
+}
+.threat-badge.high{background:rgba(255,61,90,.15);color:var(--danger);}
+.threat-badge.med{background:rgba(255,140,0,.15);color:var(--warn);}
+.threat-badge.low{background:rgba(0,230,118,.15);color:var(--ok);}
+.threat-action{
+  background:var(--card2);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  padding:7px 14px;
+  font-size:12px;
+  cursor:pointer;
+  color:var(--text2);
+  white-space:nowrap;
+  transition:all .15s;
+  font-family:var(--sans);
+}
+.threat-action:hover{border-color:var(--accent);color:var(--accent);}
+
+/* ── PLATFORM GRID ── */
+.platform-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+.platform-card{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:18px;
+  transition:all .2s;
+  cursor:pointer;
+  position:relative;
+  overflow:hidden;
+}
+.platform-card:hover{border-color:var(--border2);transform:translateY(-1px);}
+.platform-card.connected::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:var(--ok);
+}
+.platform-card.warning::before{background:var(--warn);}
+.platform-card.danger::before{background:var(--danger);}
+.platform-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.platform-icon{font-size:22px;}
+.platform-status{
+  font-family:var(--mono);font-size:10px;
+  padding:3px 8px;border-radius:20px;letter-spacing:.5px;
+}
+.platform-status.connected{background:rgba(0,230,118,.12);color:var(--ok);}
+.platform-status.warning{background:rgba(255,140,0,.12);color:var(--warn);}
+.platform-status.danger{background:rgba(255,61,90,.12);color:var(--danger);}
+.platform-name{font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:4px;}
+.platform-handle{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:12px;}
+.platform-score-row{display:flex;align-items:center;justify-content:space-between;}
+.platform-score{
+  font-family:var(--display);font-size:22px;font-weight:800;
+}
+.platform-score.ok{color:var(--ok);}
+.platform-score.warn{color:var(--warn);}
+.platform-score.danger{color:var(--danger);}
+.platform-score-label{font-family:var(--mono);font-size:10px;color:var(--text3);}
+.platform-last{font-family:var(--mono);font-size:10px;color:var(--text3);}
+
+/* ── TWO COL LAYOUT ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px;}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:20px;}
+.col-wide{grid-column:span 2;}
+
+/* ── PHISHING SCANNER ── */
+.scanner-box{
+  background:var(--bg3);
+  border:1px dashed var(--border2);
+  border-radius:12px;
+  padding:28px;
+  text-align:center;
+  cursor:pointer;
+  transition:all .2s;
+  margin-bottom:20px;
+}
+.scanner-box:hover{border-color:var(--accent);background:rgba(0,229,255,.03);}
+.scanner-box-icon{font-size:36px;margin-bottom:10px;}
+.scanner-box-label{font-family:var(--display);font-size:16px;font-weight:700;margin-bottom:6px;}
+.scanner-box-sub{font-size:13px;color:var(--text2);}
+.scan-result{
+  background:var(--card2);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:20px;
+  margin-bottom:14px;
+  display:flex;align-items:flex-start;gap:16px;
+}
+.scan-result-icon{font-size:24px;margin-top:2px;}
+.scan-result-body{flex:1;}
+.scan-result-title{font-weight:600;font-size:14px;margin-bottom:4px;}
+.scan-result-desc{font-size:12px;color:var(--text2);line-height:1.5;}
+.scan-tags{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.scan-tag{
+  font-family:var(--mono);font-size:10px;
+  padding:3px 10px;border-radius:20px;
+  background:var(--bg);border:1px solid var(--border);
+  color:var(--text2);
+}
+
+/* ── ACCESS MANAGER ── */
+.access-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:12px;
+  margin-bottom:10px;
+  transition:border-color .2s;
+}
+.access-item:hover{border-color:var(--border2);}
+.access-avatar{
+  width:40px;height:40px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:700;
+  font-family:var(--display);
+  flex-shrink:0;
+}
+.access-name{font-size:14px;font-weight:600;margin-bottom:2px;}
+.access-role{font-family:var(--mono);font-size:11px;color:var(--text2);}
+.access-platforms{display:flex;gap:6px;margin-top:6px;}
+.access-platform-tag{
+  font-family:var(--mono);font-size:10px;
+  background:var(--card);border:1px solid var(--border);
+  padding:2px 8px;border-radius:4px;
+  color:var(--text2);
+}
+.access-right{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.toggle{
+  width:42px;height:24px;
+  background:var(--bg);
+  border:1px solid var(--border2);
+  border-radius:20px;
+  cursor:pointer;
+  position:relative;
+  transition:background .2s;
+  flex-shrink:0;
+}
+.toggle.on{background:var(--ok);border-color:var(--ok);}
+.toggle::after{
+  content:'';
+  position:absolute;
+  top:3px;left:3px;
+  width:16px;height:16px;
+  border-radius:50%;
+  background:#fff;
+  transition:left .2s;
+}
+.toggle.on::after{left:21px;}
+.revoke-btn{
+  background:rgba(255,61,90,.1);
+  border:1px solid rgba(255,61,90,.3);
+  color:var(--danger);
+  border-radius:8px;
+  padding:7px 14px;
+  font-size:12px;
+  cursor:pointer;
+  font-family:var(--sans);
+  transition:all .15s;
+}
+.revoke-btn:hover{background:rgba(255,61,90,.2);}
+
+/* ── 2FA VAULT ── */
+.tfa-item{
+  display:flex;align-items:center;
+  padding:14px 18px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:12px;
+  margin-bottom:10px;
+  gap:16px;
+  transition:border-color .2s;
+}
+.tfa-item:hover{border-color:var(--border2);}
+.tfa-icon{font-size:20px;width:28px;text-align:center;}
+.tfa-name{font-size:14px;font-weight:600;flex:1;}
+.tfa-code{
+  font-family:var(--mono);
+  font-size:22px;
+  font-weight:500;
+  letter-spacing:6px;
+  color:var(--accent);
+  cursor:pointer;
+}
+.tfa-timer{
+  width:32px;height:32px;
+  position:relative;
+  flex-shrink:0;
+}
+.tfa-timer svg{transform:rotate(-90deg);}
+.tfa-timer-text{
+  position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:9px;
+  color:var(--text2);
+}
+
+/* ── RECOVERY PLAYBOOK ── */
+.playbook-step{
+  display:flex;gap:18px;
+  padding:18px 0;
+  border-bottom:1px solid var(--border);
+}
+.playbook-step:last-child{border-bottom:none;}
+.step-num{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--display);font-size:14px;font-weight:800;
+  flex-shrink:0;
+  margin-top:2px;
+}
+.step-num.done{background:var(--ok);color:var(--bg);}
+.step-num.active{background:var(--accent);color:var(--bg);animation:pulse 2s infinite;}
+.step-num.pending{background:var(--bg3);border:1px solid var(--border2);color:var(--text3);}
+.step-body{flex:1;}
+.step-title{font-size:14px;font-weight:600;margin-bottom:4px;}
+.step-desc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px;}
+.step-action{
+  background:var(--accent);
+  color:var(--bg);
+  border:none;border-radius:8px;
+  padding:8px 18px;
+  font-size:13px;font-weight:600;
+  font-family:var(--display);
+  cursor:pointer;
+  transition:all .2s;
+}
+.step-action:hover{background:#33EAFF;}
+.step-action.done{background:var(--bg3);color:var(--text3);cursor:default;}
+
+/* ── ALERT BANNER ── */
+.alert-banner{
+  background:linear-gradient(135deg, rgba(255,61,90,.12), rgba(255,61,90,.05));
+  border:1px solid rgba(255,61,90,.3);
+  border-radius:12px;
+  padding:18px 22px;
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:24px;
+}
+.alert-banner-icon{font-size:22px;}
+.alert-banner-body{flex:1;}
+.alert-banner-title{font-size:14px;font-weight:600;color:var(--danger);margin-bottom:3px;}
+.alert-banner-desc{font-size:12px;color:var(--text2);}
+.alert-dismiss{
+  font-family:var(--mono);font-size:11px;
+  color:var(--text3);cursor:pointer;
+  text-decoration:underline;
+}
+.alert-dismiss:hover{color:var(--text2);}
+
+/* ── SUBSCRIPTION PAGE ── */
+.plan-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:32px;}
+.plan-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:28px 22px;
+  position:relative;
+  transition:all .2s;
+}
+.plan-card:hover{border-color:var(--border2);transform:translateY(-2px);}
+.plan-card.featured{
+  border-color:var(--accent);
+  background:linear-gradient(160deg, rgba(0,229,255,.06) 0%, var(--card) 100%);
+}
+.plan-card.featured::before{
+  content:'MOST POPULAR';
+  position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+  background:var(--accent);
+  color:var(--bg);
+  font-family:var(--mono);font-size:9px;font-weight:500;
+  letter-spacing:2px;
+  padding:4px 14px;border-radius:20px;
+  white-space:nowrap;
+}
+.plan-name{font-family:var(--display);font-size:18px;font-weight:800;margin-bottom:6px;}
+.plan-price{
+  font-family:var(--display);font-size:36px;font-weight:800;
+  margin-bottom:4px;line-height:1;
+}
+.plan-price span{font-size:16px;font-weight:400;color:var(--text2);}
+.plan-period{font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:20px;}
+.plan-divider{height:1px;background:var(--border);margin-bottom:16px;}
+.plan-feature{
+  font-size:13px;color:var(--text2);
+  display:flex;align-items:center;gap:8px;
+  margin-bottom:10px;
+}
+.plan-feature::before{content:'✓';color:var(--ok);font-weight:700;}
+.plan-feature.na{color:var(--text3);}
+.plan-feature.na::before{content:'—';color:var(--text3);}
+.plan-btn{
+  width:100%;
+  margin-top:20px;
+  padding:12px;
+  border-radius:10px;
+  font-family:var(--display);font-size:14px;font-weight:700;
+  cursor:pointer;
+  transition:all .2s;
+  border:none;
+}
+.plan-btn.outline{
+  background:transparent;
+  border:1px solid var(--border2);
+  color:var(--text2);
+}
+.plan-btn.outline:hover{border-color:var(--text);color:var(--text);}
+.plan-btn.filled{background:var(--accent);color:var(--bg);}
+.plan-btn.filled:hover{background:#33EAFF;}
+.plan-btn.current{background:var(--bg3);color:var(--ok);cursor:default;border:1px solid rgba(0,230,118,.3);}
+
+/* ── MODALS ── */
+.modal-overlay{
+  position:fixed;inset:0;
+  background:rgba(8,11,20,.85);
+  backdrop-filter:blur(4px);
+  z-index:500;
+  display:none;
+  align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:18px;
+  padding:36px;
+  width:500px;
+  max-width:90vw;
+  max-height:80vh;
+  overflow-y:auto;
+  position:relative;
+  animation:slideUp .25s ease;
+}
+.modal-close{
+  position:absolute;top:18px;right:18px;
+  width:30px;height:30px;
+  background:var(--bg3);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;font-size:14px;color:var(--text2);
+  border:1px solid var(--border);
+  transition:all .15s;
+}
+.modal-close:hover{border-color:var(--danger);color:var(--danger);}
+.modal-title{font-family:var(--display);font-size:22px;font-weight:700;margin-bottom:8px;}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.5;}
+.form-group{margin-bottom:18px;}
+.form-label{font-family:var(--mono);font-size:11px;color:var(--text2);letter-spacing:1px;margin-bottom:8px;display:block;}
+.form-input{
+  width:100%;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px 16px;
+  font-family:var(--sans);font-size:14px;
+  color:var(--text);outline:none;
+  transition:border .2s;
+}
+.form-input:focus{border-color:var(--accent);}
+.form-input::placeholder{color:var(--text3);}
+textarea.form-input{resize:vertical;min-height:120px;font-size:13px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.checkbox-group{display:flex;flex-direction:column;gap:10px;}
+.checkbox-item{
+  display:flex;align-items:center;gap:10px;
+  cursor:pointer;font-size:13px;color:var(--text2);
+}
+.checkbox-item input{accent-color:var(--accent);width:16px;height:16px;}
+.modal-actions{display:flex;gap:12px;margin-top:24px;}
+.btn-secondary{
+  flex:1;padding:12px;
+  background:var(--bg3);
+  border:1px solid var(--border2);
+  border-radius:10px;
+  font-family:var(--display);font-size:14px;font-weight:600;
+  color:var(--text2);cursor:pointer;
+  transition:all .2s;
+}
+.btn-secondary:hover{border-color:var(--text);color:var(--text);}
+.btn-danger{
+  flex:1;padding:12px;
+  background:rgba(255,61,90,.1);
+  border:1px solid rgba(255,61,90,.3);
+  border-radius:10px;
+  font-family:var(--display);font-size:14px;font-weight:600;
+  color:var(--danger);cursor:pointer;
+  transition:all .2s;
+}
+.btn-danger:hover{background:rgba(255,61,90,.2);}
+.btn-primary-modal{
+  flex:1;padding:12px;
+  background:var(--accent);
+  border:none;
+  border-radius:10px;
+  font-family:var(--display);font-size:14px;font-weight:700;
+  color:var(--bg);cursor:pointer;
+  transition:all .2s;
+}
+.btn-primary-modal:hover{background:#33EAFF;}
+
+/* ── SETTINGS ── */
+.settings-section{margin-bottom:32px;}
+.settings-section-title{
+  font-family:var(--display);font-size:16px;font-weight:700;
+  margin-bottom:16px;padding-bottom:12px;
+  border-bottom:1px solid var(--border);
+  letter-spacing:-.3px;
+}
+.settings-item{
+  display:flex;align-items:center;
+  padding:14px 0;
+  border-bottom:1px solid var(--border);
+}
+.settings-item:last-child{border-bottom:none;}
+.settings-item-body{flex:1;}
+.settings-item-title{font-size:14px;font-weight:500;margin-bottom:3px;}
+.settings-item-desc{font-size:12px;color:var(--text2);}
+.settings-item-right{flex-shrink:0;margin-left:20px;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes slideUp{
+  from{opacity:0;transform:translateY(30px);}
+  to{opacity:1;transform:translateY(0);}
+}
+@keyframes pulse{
+  0%,100%{opacity:1;}
+  50%{opacity:.5;}
+}
+@keyframes scanLine{
+  0%{top:-2px;}
+  100%{top:100%;}
+}
+@keyframes spin{
+  to{transform:rotate(360deg);}
+}
+.fade-in{animation:fadeUp .4s ease both;}
+.fade-in-1{animation:fadeUp .4s .1s ease both;opacity:0;}
+.fade-in-2{animation:fadeUp .4s .2s ease both;opacity:0;}
+.fade-in-3{animation:fadeUp .4s .3s ease both;opacity:0;}
+
+/* ── TOAST ── */
+.toast-wrap{
+  position:fixed;bottom:28px;right:28px;
+  z-index:999;
+  display:flex;flex-direction:column;gap:10px;
+  pointer-events:none;
+}
+.toast{
+  background:var(--card2);
+  border:1px solid var(--border2);
+  border-radius:12px;
+  padding:14px 20px;
+  font-size:13px;
+  display:flex;align-items:center;gap:10px;
+  animation:slideUp .3s ease;
+  pointer-events:all;
+  min-width:260px;
+  max-width:340px;
+}
+.toast.ok{border-color:rgba(0,230,118,.4);}
+.toast.err{border-color:rgba(255,61,90,.4);}
+.toast.warn{border-color:rgba(255,140,0,.4);}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:4px;}
+
+/* ── EMPTY STATE ── */
+.empty-state{
+  text-align:center;padding:48px 24px;
+  color:var(--text2);
+}
+.empty-icon{font-size:48px;margin-bottom:16px;opacity:.4;}
+.empty-title{font-family:var(--display);font-size:18px;font-weight:700;margin-bottom:8px;color:var(--text);}
+.empty-desc{font-size:13px;line-height:1.5;}
+</style>
+</head>
+<body>
+
+<!-- ══ SPLASH ════════════════════════════════════════════ -->
+<div id="splash">
+  <div class="splash-logo">Flex<span>er</span></div>
+  <div class="splash-tag">Creator Security HQ</div>
+  <div class="splash-form">
+    <input type="text" placeholder="Username or email" id="loginUser"/>
+    <input type="password" placeholder="Password" id="loginPass"/>
+    <button class="btn-primary" onclick="doLogin()">Secure Sign In →</button>
+  </div>
+  <div class="splash-skip" onclick="doLogin()">Skip to demo →</div>
+</div>
+
+<!-- ══ TOAST CONTAINER ════════════════════════════════════ -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<!-- ══ MODAL — THREAT DETAIL ════════════════════════════ -->
+<div class="modal-overlay" id="threatModal">
+  <div class="modal">
+    <div class="modal-close" onclick="closeModal('threatModal')">✕</div>
+    <div class="modal-title" id="threatModalTitle">Threat Detail</div>
+    <div class="modal-sub" id="threatModalDesc"></div>
+    <div id="threatModalBody"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('threatModal')">Dismiss</button>
+      <button class="btn-primary-modal" onclick="markResolved()">Mark Resolved</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL — ADD ACCESS ════════════════════════════════ -->
+<div class="modal-overlay" id="accessModal">
+  <div class="modal">
+    <div class="modal-close" onclick="closeModal('accessModal')">✕</div>
+    <div class="modal-title">Grant Platform Access</div>
+    <div class="modal-sub">Add a team member or VA with limited, controlled access. They never see your master credentials.</div>
+    <div class="form-group">
+      <label class="form-label">Full Name</label>
+      <input class="form-input" type="text" placeholder="e.g. Sarah Johnson"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Role</label>
+      <input class="form-input" type="text" placeholder="e.g. Video Editor, VA, Manager"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <input class="form-input" type="email" placeholder="their@email.com"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Platform Access</label>
+      <div class="checkbox-group">
+        <label class="checkbox-item"><input type="checkbox" checked/> Instagram</label>
+        <label class="checkbox-item"><input type="checkbox"/> TikTok</label>
+        <label class="checkbox-item"><input type="checkbox"/> YouTube</label>
+        <label class="checkbox-item"><input type="checkbox"/> X / Twitter</label>
+        <label class="checkbox-item"><input type="checkbox"/> LinkedIn</label>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Access Expires</label>
+      <input class="form-input" type="date"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('accessModal')">Cancel</button>
+      <button class="btn-primary-modal" onclick="addAccess()">Send Invite →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL — SCAN EMAIL ════════════════════════════════ -->
+<div class="modal-overlay" id="scanModal">
+  <div class="modal">
+    <div class="modal-close" onclick="closeModal('scanModal')">✕</div>
+    <div class="modal-title">Paste Email / DM to Scan</div>
+    <div class="modal-sub">Copy and paste the full content of any suspicious brand deal, collaboration offer, or DM. Flexer will analyse it for phishing patterns.</div>
+    <div class="form-group">
+      <label class="form-label">Email / Message Content</label>
+      <textarea class="form-input" id="scanInput" placeholder="Paste the email or message here...&#10;&#10;Example: Hi! We love your content and want to offer you a collaboration with our brand..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('scanModal')">Cancel</button>
+      <button class="btn-primary-modal" onclick="runScan()">Scan Now →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APP ═════════════════════════════════════════════════ -->
+<div id="app">
+  <nav class="sidebar">
+    <div class="sidebar-logo">Flex<span>er</span></div>
+
+    <div class="nav-section">Overview</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)">
+      <span class="icon">⬡</span> Dashboard
+    </div>
+    <div class="nav-item" onclick="showPage('threats',this)">
+      <span class="icon">⚡</span> Threat Feed
+      <span class="nav-badge">3</span>
+    </div>
+
+    <div class="nav-section" style="margin-top:8px;">Platforms</div>
+    <div class="nav-item" onclick="showPage('platforms',this)">
+      <span class="icon">◈</span> Platform Monitor
+    </div>
+    <div class="nav-item" onclick="showPage('phishing',this)">
+      <span class="icon">✉</span> Phishing Scanner
+      <span class="nav-badge warn">1</span>
+    </div>
+
+    <div class="nav-section" style="margin-top:8px;">Access</div>
+    <div class="nav-item" onclick="showPage('access',this)">
+      <span class="icon">◎</span> Access Manager
+    </div>
+    <div class="nav-item" onclick="showPage('vault',this)">
+      <span class="icon">⬗</span> 2FA Vault
+      <span class="nav-badge ok">5</span>
+    </div>
+
+    <div class="nav-section" style="margin-top:8px;">Tools</div>
+    <div class="nav-item" onclick="showPage('recovery',this)">
+      <span class="icon">↺</span> Recovery Playbook
+    </div>
+    <div class="nav-item" onclick="showPage('subscription',this)">
+      <span class="icon">◇</span> Subscription
+    </div>
+    <div class="nav-item" onclick="showPage('settings',this)">
+      <span class="icon">⊙</span> Settings
+    </div>
+
+    <div class="sidebar-bottom">
+      <div class="user-pill">
+        <div class="user-avatar">AC</div>
+        <div>
+          <div class="user-name">Acaylia</div>
+          <div class="user-plan">PRO PLAN</div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="main">
+
+    <!-- ══ DASHBOARD ══ -->
+    <div class="page active" id="page-dashboard">
+      <div class="topbar fade-in">
+        <div>
+          <div class="page-title">Security Dashboard</div>
+          <div class="page-sub">Wednesday, 29 April 2025 · All systems monitored</div>
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-btn"><div class="alert-dot"></div> 3 Active Alerts</button>
+          <button class="topbar-btn" onclick="showPage('phishing',document.querySelector('.nav-item:nth-child(8)'))">+ Scan Email</button>
+        </div>
+      </div>
+
+      <div class="alert-banner fade-in-1">
+        <div class="alert-banner-icon">⚠️</div>
+        <div class="alert-banner-body">
+          <div class="alert-banner-title">Login from unrecognised device detected on Instagram</div>
+          <div class="alert-banner-desc">Location: Lagos, Nigeria · Device: Chrome on Android · 14 minutes ago — This was not you. We've flagged it. Take action now.</div>
+        </div>
+        <div onclick="openThreatModal('Unrecognised Login — Instagram','A login was detected from a device and location not associated with your account. If this was not you, secure your account immediately.','high')" style="cursor:pointer;background:var(--danger);color:#fff;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;font-family:var(--display);white-space:nowrap;">View & Act →</div>
+        <div class="alert-dismiss" onclick="this.closest('.alert-banner').style.display='none'">dismiss</div>
+      </div>
+
+      <div class="stat-grid fade-in-2">
+        <div class="stat-card danger">
+          <div class="stat-icon">⚡</div>
+          <div class="stat-label">ACTIVE THREATS</div>
+          <div class="stat-val danger">3</div>
+          <div class="stat-delta">↑ 2 since yesterday</div>
+        </div>
+        <div class="stat-card ok">
+          <div class="stat-icon">◈</div>
+          <div class="stat-label">PLATFORMS SECURED</div>
+          <div class="stat-val ok">5</div>
+          <div class="stat-delta">of 6 connected</div>
+        </div>
+        <div class="stat-card warn">
+          <div class="stat-icon">✉</div>
+          <div class="stat-label">PHISHING BLOCKED</div>
+          <div class="stat-val warn">12</div>
+          <div class="stat-delta">this month</div>
+        </div>
+        <div class="stat-card info">
+          <div class="stat-icon">⬡</div>
+          <div class="stat-label">SECURITY SCORE</div>
+          <div class="stat-val info">74</div>
+          <div class="stat-delta">↑ 8 from last week</div>
+        </div>
+      </div>
+
+      <div class="two-col fade-in-3">
+        <div class="card">
+          <div class="card-title">Security Score Breakdown <a onclick="showPage('platforms',document.querySelectorAll('.nav-item')[3])">See all →</a></div>
+          <div class="score-wrap">
+            <div class="score-ring-wrap">
+              <svg width="140" height="140" viewBox="0 0 140 140">
+                <circle cx="70" cy="70" r="58" fill="none" stroke="#1A2540" stroke-width="12"/>
+                <circle cx="70" cy="70" r="58" fill="none" stroke="#00E676" stroke-width="12"
+                  stroke-dasharray="364" stroke-dashoffset="95" stroke-linecap="round"
+                  style="transition:stroke-dashoffset 1.2s ease;"/>
+              </svg>
+              <div class="score-center">
+                <div class="score-num">74</div>
+                <div class="score-label">/100</div>
+              </div>
+            </div>
+            <div class="score-breakdown">
+              <div class="score-row">
+                <div class="score-row-label">2FA Coverage</div>
+                <div class="score-bar-bg"><div class="score-bar-fill" style="width:83%;background:var(--ok);"></div></div>
+                <div class="score-row-val" style="color:var(--ok)">83</div>
+              </div>
+              <div class="score-row">
+                <div class="score-row-label">Password Strength</div>
+                <div class="score-bar-bg"><div class="score-bar-fill" style="width:67%;background:var(--warn);"></div></div>
+                <div class="score-row-val" style="color:var(--warn)">67</div>
+              </div>
+              <div class="score-row">
+                <div class="score-row-label">Login Monitoring</div>
+                <div class="score-bar-bg"><div class="score-bar-fill" style="width:90%;background:var(--ok);"></div></div>
+                <div class="score-row-val" style="color:var(--ok)">90</div>
+              </div>
+              <div class="score-row">
+                <div class="score-row-label">Access Control</div>
+                <div class="score-bar-bg"><div class="score-bar-fill" style="width:55%;background:var(--warn);"></div></div>
+                <div class="score-row-val" style="color:var(--warn)">55</div>
+              </div>
+              <div class="score-row">
+                <div class="score-row-label">Phishing Protection</div>
+                <div class="score-bar-bg"><div class="score-bar-fill" style="width:71%;background:var(--ok);"></div></div>
+                <div class="score-row-val" style="color:var(--ok)">71</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">Live Threat Feed <a onclick="showPage('threats',document.querySelectorAll('.nav-item')[1])">View all →</a></div>
+          <div class="threat-item">
+            <div class="threat-dot high"></div>
+            <div class="threat-body">
+              <div class="threat-title">Unrecognised login — Instagram</div>
+              <div class="threat-desc">Login from Lagos, Nigeria on unregistered device</div>
+              <div class="threat-meta">
+                <div class="threat-platform">Instagram</div>
+                <div class="threat-badge high">HIGH</div>
+                <div class="threat-time">14 min ago</div>
+              </div>
+            </div>
+            <button class="threat-action" onclick="openThreatModal('Unrecognised Login','Lagos, Nigeria · Chrome · Android','high')">Act →</button>
+          </div>
+          <div class="threat-item">
+            <div class="threat-dot med"></div>
+            <div class="threat-body">
+              <div class="threat-title">Suspicious brand deal email detected</div>
+              <div class="threat-desc">Phishing pattern match: 87% confidence</div>
+              <div class="threat-meta">
+                <div class="threat-platform">Email</div>
+                <div class="threat-badge med">MED</div>
+                <div class="threat-time">2 hrs ago</div>
+              </div>
+            </div>
+            <button class="threat-action" onclick="showPage('phishing',document.querySelectorAll('.nav-item')[4])">Review →</button>
+          </div>
+          <div class="threat-item">
+            <div class="threat-dot med"></div>
+            <div class="threat-body">
+              <div class="threat-title">Expired VA access still active</div>
+              <div class="threat-desc">@editsbyjess access should have expired 3 days ago</div>
+              <div class="threat-meta">
+                <div class="threat-platform">Access Manager</div>
+                <div class="threat-badge med">MED</div>
+                <div class="threat-time">3 days ago</div>
+              </div>
+            </div>
+            <button class="threat-action" onclick="showPage('access',document.querySelectorAll('.nav-item')[5])">Fix →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ THREAT FEED ══ -->
+    <div class="page" id="page-threats">
+      <div class="topbar fade-in">
+        <div>
+          <div class="page-title">Threat Feed</div>
+          <div class="page-sub">Real-time security events across all your platforms</div>
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-btn">Filter by platform ▾</button>
+          <button class="topbar-btn">Last 7 days ▾</button>
+        </div>
+      </div>
+      <div class="card fade-in-1">
+        <div class="card-title">Active Threats (3)</div>
+        <div class="threat-item">
+          <div class="threat-dot high"></div>
+          <div class="threat-body">
+            <div class="threat-title">Unrecognised login detected — Instagram</div>
+            <div class="threat-desc">A login was attempted from Lagos, Nigeria using Chrome on Android. This device has never been associated with your account. Your Instagram session was not terminated and the login succeeded.</div>
+            <div class="threat-meta">
+              <div class="threat-platform">Instagram</div>
+              <div class="threat-badge high">HIGH SEVERITY</div>
+              <div class="threat-time">14 minutes ago</div>
+            </div>
+          </div>
+          <button class="threat-action" onclick="openThreatModal('Unrecognised Login — Instagram','A login succeeded from an unrecognised device. Immediate action recommended.','high')">View & Act</button>
+        </div>
+        <div class="threat-item">
+          <div class="threat-dot med"></div>
+          <div class="threat-body">
+            <div class="threat-title">Phishing email — brand collaboration scam</div>
+            <div class="threat-desc">An email claiming to be from "BrandVault Partners" matches 4 known phishing indicators. Sender domain was registered 11 days ago. Link destination redirects through 3 obfuscated URLs before landing on a credential harvest page.</div>
+            <div class="threat-meta">
+              <div class="threat-platform">Email</div>
+              <div class="threat-badge med">MEDIUM SEVERITY</div>
+              <div class="threat-time">2 hours ago</div>
+            </div>
+          </div>
+          <button class="threat-action" onclick="showPage('phishing',document.querySelectorAll('.nav-item')[4])">Review</button>
+        </div>
+        <div class="threat-item">
+          <div class="threat-dot med"></div>
+          <div class="threat-body">
+            <div class="threat-title">Expired team access — @editsbyjess</div>
+            <div class="threat-desc">Access granted to Jess Williams (Video Editor) expired on 25 April. Access has not been revoked and she retains login capability to your Instagram and YouTube accounts.</div>
+            <div class="threat-meta">
+              <div class="threat-platform">Access Manager</div>
+              <div class="threat-badge med">MEDIUM SEVERITY</div>
+              <div class="threat-time">3 days ago</div>
+            </div>
+          </div>
+          <button class="threat-action" onclick="showPage('access',document.querySelectorAll('.nav-item')[5])">Revoke Access</button>
+        </div>
+      </div>
+      <div class="card fade-in-2" style="margin-top:20px;">
+        <div class="card-title">Resolved This Month (9)</div>
+        <div class="threat-item">
+          <div class="threat-dot low"></div>
+          <div class="threat-body">
+            <div class="threat-title">Password breach check — no exposure found</div>
+            <div class="threat-desc">Weekly scan of your credentials against known breach databases returned clear.</div>
+            <div class="threat-meta"><div class="threat-platform">All Platforms</div><div class="threat-badge low">CLEAR</div><div class="threat-time">2 days ago</div></div>
+          </div>
+        </div>
+        <div class="threat-item">
+          <div class="threat-dot low"></div>
+          <div class="threat-body">
+            <div class="threat-title">New login location approved — Cape Town</div>
+            <div class="threat-desc">You confirmed a new login location. Added to your trusted locations list.</div>
+            <div class="threat-meta"><div class="threat-platform">TikTok</div><div class="threat-badge low">RESOLVED</div><div class="threat-time">5 days ago</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PLATFORMS ══ -->
+    <div class="page" id="page-platforms">
+      <div class="topbar fade-in">
+        <div>
+          <div class="page-title">Platform Monitor</div>
+          <div class="page-sub">Security health across all your connected accounts</div>
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-btn" onclick="showToast('Connect platform flow coming in next build! 🔗','ok')">+ Connect Platform</button>
+        </div>
+      </div>
+      <div class="platform-grid fade-in-1">
+        <div class="platform-card danger" onclick="openThreatModal('Instagram Security Alert','Unrecognised login detected 14 minutes ago from Lagos, Nigeria.','high')">
+          <div class="platform-top">
+            <div class="platform-icon">📸</div>
+            <div class="platform-status danger">⚠ Alert</div>
+          </div>
+          <div class="platform-name">Instagram</div>
+          <div class="platform-handle">@acayliacreates</div>
+          <div class="platform-score-row">
+            <div><div class="platform-score danger">52</div><div class="platform-score-label">Security Score</div></div>
+            <div class="platform-last">Alert · 14m ago</div>
+          </div>
+        </div>
+        <div class="platform-card connected">
+          <div class="platform-top">
+            <div class="platform-icon">🎵</div>
+            <div class="platform-status connected">✓ Secure</div>
+          </div>
+          <div class="platform-name">TikTok</div>
+          <div class="platform-handle">@acayliacreates</div>
+          <div class="platform-score-row">
+            <div><div class="platform-score ok">88</div><div class="platform-score-label">Security Score</div></div>
+            <div class="platform-last">Checked 1h ago</div>
+          </div>
+        </div>
+        <div class="platform-card connected">
+          <div class="platform-top">
+            <div class="platform-icon">▶️</div>
+            <div class="platform-status connected">✓ Secure</div>
+          </div>
+          <div class="platform-name">YouTube</div>
+          <div class="platform-handle">Acaylia Creates</div>
+          <div class="platform-score-row">
+            <div><div class="platform-score ok">91</div><div class="platform-score-label">Security Score</div></div>
+            <div class="platform-last">Checked 1h ago</div>
+          </div>
+        </div>
+        <div class="platform-card warning">
+          <div class="platform-top">
+            <div class="platform-icon">𝕏</div>
+            <div class="platform-status warning">! Warning</div>
+          </div>
+          <div class="platform-name">X / Twitter</div>
+          <div class="platform-handle">@acayliacreates</div>
+          <div class="platform-score-row">
+            <div><div class="platform-score warn">64</div><div class="platform-score-label">Security Score</div></div>
+            <div class="platform-last">No 2FA set</div>
+          </div>
+        </div>
+        <div class="platform-card connected">
+          <div class="platform-top">
+            <div class="platform-icon">💼</div>
+            <div class="platform-status connected">✓ Secure</div>
+          </div>
+          <div class="platform-name">LinkedIn</div>
+          <div class="platform-handle">Acaylia Founder</div>
+          <div class="platform-score-row">
+            <div><div class="platform-score ok">85</div><div class="platform-score-label">Security Score</div></div>
+            <div class="platform-last">Checked 2h ago</div>
+          </div>
+        </div>
+        <div class="platform-card connected">
+          <div class="platform-top">
+            <div class="platform-icon">🎮</div>
+            <div class="platform-status connected">✓ Secure</div>
+          </div>
+          <div class="platform-name">Twitch</div>
+          <div class="platform-handle">acaylialive</div>
+          <div class="platform-score-row">
+            <div><div class="platform-score ok">79</div><div class="platform-score-label">Security Score</div></div>
+            <div class="platform-last">Checked 3h ago</div>
+          </div>
+        </div>
+      </div>
+      <div class="card fade-in-2">
+        <div class="card-title">Recommendations to improve your score</div>
+        <div class="threat-item">
+          <div class="threat-dot med"></div>
+          <div class="threat-body">
+            <div class="threat-title">Enable 2FA on X / Twitter</div>
+            <div class="threat-desc">Your X account has no two-factor authentication. This is the most common entry point for account takeovers. Enable it now to add +18 points to your score.</div>
+            <div class="threat-meta"><div class="threat-platform">X / Twitter</div><div class="threat-time">Recommended action</div></div>
+          </div>
+          <button class="threat-action" onclick="showToast('Opening X security settings...','ok')">Fix Now →</button>
+        </div>
+        <div class="threat-item">
+          <div class="threat-dot med"></div>
+          <div class="threat-body">
+            <div class="threat-title">Revoke expired team access</div>
+            <div class="threat-desc">@editsbyjess access expired 3 days ago but is still active on Instagram and YouTube. Revoke to add +9 points.</div>
+            <div class="threat-meta"><div class="threat-platform">Access Manager</div><div class="threat-time">Recommended action</div></div>
+          </div>
+          <button class="threat-action" onclick="showPage('access',document.querySelectorAll('.nav-item')[5])">Fix Now →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ PHISHING SCANNER ══ -->
+    <div class="page" id="page-phishing">
+      <div class="topbar fade-in">
+        <div>
+          <div class="page-title">Phishing Scanner</div>
+          <div class="page-sub">Scan suspicious brand deal emails, DMs, and collaboration offers</div>
+        </div>
+      </div>
+      <div class="scanner-box fade-in-1" onclick="openModal('scanModal')">
+        <div class="scanner-box-icon">✉️</div>
+        <div class="scanner-box-label">Paste Email or DM to Scan</div>
+        <div class="scanner-box-sub">Copy the full email or message content and we'll check it against known phishing patterns</div>
+      </div>
+      <div class="card fade-in-2">
+        <div class="card-title">Recent Scans</div>
+        <div class="scan-result">
+          <div class="scan-result-icon">🚨</div>
+          <div class="scan-result-body">
+            <div class="scan-result-title" style="color:var(--danger)">PHISHING DETECTED — BrandVault Partners collaboration offer</div>
+            <div class="scan-result-desc">This email matches 4 known phishing indicators. The sender domain (brandvault-partners-collab.com) was registered 11 days ago. The embedded link routes through 3 redirect layers before landing on a credential harvest page designed to look like Instagram's login screen.</div>
+            <div class="scan-tags">
+              <div class="scan-tag" style="color:var(--danger);border-color:rgba(255,61,90,.3)">🚩 New domain (11 days)</div>
+              <div class="scan-tag" style="color:var(--danger);border-color:rgba(255,61,90,.3)">🚩 Redirect chain</div>
+              <div class="scan-tag" style="color:var(--danger);border-color:rgba(255,61,90,.3)">🚩 Credential harvest page</div>
+              <div class="scan-tag" style="color:var(--danger);border-color:rgba(255,61,90,.3)">🚩 Urgency language detected</div>
+              <div class="scan-tag">87% confidence</div>
+            </div>
+          </div>
+        </div>
+        <div class="scan-result">
+          <div class="scan-result-icon">✅</div>
+          <div class="scan-result-body">
+            <div class="scan-result-title" style="color:var(--ok)">CLEAR — Nike x Creators collab outreach</div>
+            <div class="scan-result-desc">Sender domain matches nike.com corporate (verified). No redirect chains. Link destination is a legitimate Typeform application form. No credential collection detected. Sender email matches pattern of previous verified Nike outreach emails.</div>
+            <div class="scan-tags">
+              <div class="scan-tag" style="color:var(--ok);border-color:rgba(0,230,118,.3)">✓ Verified domain</div>
+              <div class="scan-tag" style="color:var(--ok);border-color:rgba(0,230,118,.3)">✓ No redirect</div>
+              <div class="scan-tag" style="color:var(--ok);border-color:rgba(0,230,118,.3)">✓ No credential harvest</div>
+              <div class="scan-tag">98% confidence safe</div>
+            </div>
+          </div>
+        </div>
+        <div class="scan-result">
+          <div class="scan-result-icon">⚠️</div>
+          <div class="scan-result-body">
+            <div class="scan-result-title" style="color:var(--warn)">SUSPICIOUS — Management offer from "CreatorFirst Agency"</div>
+            <div class="scan-result-desc">Domain is 34 days old. No verifiable company registration. Email contains requests for social security number and bank details upfront — highly unusual for legitimate agency outreach at this stage.</div>
+            <div class="scan-tags">
+              <div class="scan-tag" style="color:var(--warn);border-color:rgba(255,140,0,.3)">⚠ Young domain</div>
+              <div class="scan-tag" style="color:var(--warn);border-color:rgba(255,140,0,.3)">⚠ PII request early</div>
+              <div class="scan-tag">62% suspicious</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ ACCESS MANAGER ══ -->
+    <div class="page" id="page-access">
+      <div class="topbar fade-in">
+        <div>
+          <div class="page-title">Access Manager</div>
+          <div class="page-sub">Control who has access to your platforms — without sharing your passwords</div>
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-btn btn-primary" onclick="openModal('accessModal')" style="background:var(--accent);color:var(--bg);border-color:var(--accent);">+ Add Team Member</button>
+        </div>
+      </div>
+      <div class="card fade-in-1" style="margin-bottom:20px;">
+        <div class="card-title">Active Access (3)</div>
+        <div class="access-item">
+          <div class="access-avatar" style="background:linear-gradient(135deg,#FF6B6B,#FF3D5A);">JW</div>
+          <div>
+            <div class="access-name">Jess Williams</div>
+            <div class="access-role">Video Editor</div>
+            <div class="access-platforms">
+              <div class="access-platform-tag">Instagram</div>
+              <div class="access-platform-tag">YouTube</div>
+            </div>
+          </div>
+          <div class="access-right">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--danger);background:rgba(255,61,90,.1);padding:4px 10px;border-radius:20px;border:1px solid rgba(255,61,90,.2);">EXPIRED 3 DAYS AGO</div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            <button class="revoke-btn" onclick="revokeAccess(this,'Jess Williams')">Revoke</button>
+          </div>
+        </div>
+        <div class="access-item">
+          <div class="access-avatar" style="background:linear-gradient(135deg,#7C4DFF,#3D5AFE);">TM</div>
+          <div>
+            <div class="access-name">Tanya Mokoena</div>
+            <div class="access-role">Social Media Manager</div>
+            <div class="access-platforms">
+              <div class="access-platform-tag">Instagram</div>
+              <div class="access-platform-tag">TikTok</div>
+              <div class="access-platform-tag">X</div>
+            </div>
+          </div>
+          <div class="access-right">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--ok);background:rgba(0,230,118,.1);padding:4px 10px;border-radius:20px;border:1px solid rgba(0,230,118,.2);">ACTIVE · Expires 30 Jun</div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            <button class="revoke-btn" onclick="revokeAccess(this,'Tanya Mokoena')">Revoke</button>
+          </div>
+        </div>
+        <div class="access-item">
+          <div class="access-avatar" style="background:linear-gradient(135deg,#00BCD4,#00E5FF);">KP</div>
+          <div>
+            <div class="access-name">Kieran Photography</div>
+            <div class="access-role">Photographer / Content</div>
+            <div class="access-platforms">
+              <div class="access-platform-tag">Instagram</div>
+            </div>
+          </div>
+          <div class="access-right">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--ok);background:rgba(0,230,118,.1);padding:4px 10px;border-radius:20px;border:1px solid rgba(0,230,118,.2);">ACTIVE · Expires 15 May</div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+            <button class="revoke-btn" onclick="revokeAccess(this,'Kieran Photography')">Revoke</button>
+          </div>
+        </div>
+      </div>
+      <div class="card fade-in-2">
+        <div class="card-title">Revoked Access History</div>
+        <div class="access-item" style="opacity:.5;">
+          <div class="access-avatar" style="background:#2A3550;">MB</div>
+          <div>
+            <div class="access-name">Marcus B</div>
+            <div class="access-role">Former Editor</div>
+            <div class="access-platforms"><div class="access-platform-tag">YouTube</div></div>
+          </div>
+          <div class="access-right">
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);">REVOKED · 12 Apr 2025</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ 2FA VAULT ══ -->
+    <div class="page" id="page-vault">
+      <div class="topbar fade-in">
+        <div>
+          <div class="page-title">2FA Vault</div>
+          <div class="page-sub">All your two-factor authentication codes in one place</div>
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-btn" onclick="showToast('Add 2FA account flow coming soon!','ok')">+ Add Account</button>
+        </div>
+      </div>
+      <div class="card fade-in-1">
+        <div class="card-title">Active Codes (5) <a>Copy all</a></div>
+        <div id="tfaList"></div>
+      </div>
+    </div>
+
+    <!-- ══ RECOVERY PLAYBOOK ══ -->
+    <div class="page" id="page-recovery">
+      <div class="topbar fade-in">
+        <div>
+          <div class="page-title">Recovery Playbook</div>
+          <div class="page-sub">Step-by-step guide if your account has been compromised</div>
+        </div>
+      </div>
+      <div class="alert-banner fade-in-1" style="background:linear-gradient(135deg,rgba(0,229,255,.08),rgba(0,229,255,.03));border-color:rgba(0,229,255,.2);">
+        <div class="alert-banner-icon">ℹ️</div>
+        <div class="alert-banner-body">
+          <div class="alert-banner-title" style="color:var(--accent)">This playbook is pre-loaded for Instagram takeover recovery</div>
+          <div class="alert-banner-desc">Based on the active alert on your account. Work through each step in order. Do not skip steps.</div>
+        </div>
+      </div>
+      <div class="card fade-in-2">
+        <div class="card-title">Instagram Account Recovery — Active</div>
+        <div class="playbook-step">
+          <div class="step-num done">✓</div>
+          <div class="step-body">
+            <div class="step-title">Threat Detected & Logged</div>
+            <div class="step-desc">Flexer detected the unrecognised login and logged all details including IP address, device fingerprint, and timestamp. Evidence is preserved.</div>
+            <button class="step-action done" disabled>Complete</button>
+          </div>
+        </div>
+        <div class="playbook-step">
+          <div class="step-num active">2</div>
+          <div class="step-body">
+            <div class="step-title">Change Your Instagram Password Immediately</div>
+            <div class="step-desc">Go to Instagram Settings → Security → Password. Choose a new password you have never used anywhere. Use at minimum 16 characters with a mix of symbols and numbers. Do not reuse any previous password.</div>
+            <button class="step-action" onclick="markStep(this)">Mark Done →</button>
+          </div>
+        </div>
+        <div class="playbook-step">
+          <div class="step-num pending">3</div>
+          <div class="step-body">
+            <div class="step-title">Revoke All Active Sessions</div>
+            <div class="step-desc">Instagram Settings → Security → Active Sessions → Log Out All Devices. This terminates any session the attacker may still have open, including the Lagos login.</div>
+            <button class="step-action" onclick="markStep(this)">Mark Done →</button>
+          </div>
+        </div>
+        <div class="playbook-step">
+          <div class="step-num pending">4</div>
+          <div class="step-body">
+            <div class="step-title">Enable or Reset 2FA</div>
+            <div class="step-desc">Instagram Settings → Security → Two-Factor Authentication. If you already have 2FA, reset the authenticator app. Use an authenticator app (not SMS) — SIM swap attacks can bypass SMS 2FA.</div>
+            <button class="step-action" onclick="markStep(this)">Mark Done →</button>
+          </div>
+        </div>
+        <div class="playbook-step">
+          <div class="step-num pending">5</div>
+          <div class="step-body">
+            <div class="step-title">Review & Revoke Third-Party App Access</div>
+            <div class="step-desc">Instagram Settings → Security → Apps and Websites. Remove any app you don't recognise or no longer use. Attackers often use OAuth tokens from third-party apps to maintain access even after a password change.</div>
+            <button class="step-action" onclick="markStep(this)">Mark Done →</button>
+          </div>
+        </div>
+        <div class="playbook-step">
+          <div class="step-num pending">6</div>
+          <div class="step-body">
+            <div class="step-title">Report to Instagram & Document</div>
+            <div class="step-desc">Report the incident via Instagram's official reporting tool. Flexer has logged the full incident report — download it for your records and for any police or platform escalation if needed.</div>
+            <button class="step-action" onclick="showToast('Incident report ready to download! 📄','ok')">Download Report →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SUBSCRIPTION ══ -->
+    <div class="page" id="page-subscription">
+      <div class="topbar fade-in">
+        <div>
+          <div class="page-title">Subscription Plans</div>
+          <div class="page-sub">You are currently on the Pro plan · Next billing: 29 May 2025</div>
+        </div>
+        <div class="topbar-right">
+          <button class="topbar-btn">Monthly ▾</button>
+        </div>
+      </div>
+      <div class="plan-grid fade-in-1">
+        <div class="plan-card">
+          <div class="plan-name">Free</div>
+          <div class="plan-price">R0<span></span></div>
+          <div class="plan-period">forever</div>
+          <div class="plan-divider"></div>
+          <div class="plan-feature">1 platform monitored</div>
+          <div class="plan-feature">Basic breach alerts</div>
+          <div class="plan-feature">Platform health score</div>
+          <div class="plan-feature na">Phishing scanner</div>
+          <div class="plan-feature na">Access manager</div>
+          <div class="plan-feature na">2FA vault</div>
+          <div class="plan-feature na">Recovery playbook</div>
+          <button class="plan-btn outline">Get Started</button>
+        </div>
+        <div class="plan-card">
+          <div class="plan-name">Creator</div>
+          <div class="plan-price">R149<span>/mo</span></div>
+          <div class="plan-period">R1,490 billed annually (save 17%)</div>
+          <div class="plan-divider"></div>
+          <div class="plan-feature">5 platforms monitored</div>
+          <div class="plan-feature">Full breach monitoring</div>
+          <div class="plan-feature">Phishing email scanner</div>
+          <div class="plan-feature">2FA vault (5 accounts)</div>
+          <div class="plan-feature">Platform health score</div>
+          <div class="plan-feature na">Access manager</div>
+          <div class="plan-feature na">Recovery playbook</div>
+          <button class="plan-btn outline" onclick="showToast('Downgrade request sent. Changes apply at end of billing cycle.','warn')">Downgrade</button>
+        </div>
+        <div class="plan-card featured">
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">R349<span>/mo</span></div>
+          <div class="plan-period">R3,490 billed annually (save 17%)</div>
+          <div class="plan-divider"></div>
+          <div class="plan-feature">Unlimited platforms</div>
+          <div class="plan-feature">Anomaly detection (AI)</div>
+          <div class="plan-feature">Phishing scanner (advanced)</div>
+          <div class="plan-feature">Access manager</div>
+          <div class="plan-feature">2FA vault (unlimited)</div>
+          <div class="plan-feature">Recovery playbook</div>
+          <div class="plan-feature">Priority support</div>
+          <button class="plan-btn current">✓ Current Plan</button>
+        </div>
+        <div class="plan-card">
+          <div class="plan-name">Agency</div>
+          <div class="plan-price">R1,499<span>/mo</span></div>
+          <div class="plan-period">R14,990 billed annually (save 17%)</div>
+          <div class="plan-divider"></div>
+          <div class="plan-feature">20 creator accounts</div>
+          <div class="plan-feature">Multi-creator dashboard</div>
+          <div class="plan-feature">All Pro features × 20</div>
+          <div class="plan-feature">White-label ready</div>
+          <div class="plan-feature">Dedicated onboarding</div>
+          <div class="plan-feature">SLA support response</div>
+          <div class="plan-feature">Custom integrations</div>
+          <button class="plan-btn outline" onclick="showToast('Upgrade to Agency — our team will contact you within 24hrs! 🚀','ok')">Upgrade</button>
+        </div>
+      </div>
+      <div class="card fade-in-2">
+        <div class="card-title">White-Label Licensing</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:center;">
+          <div>
+            <div style="font-family:var(--display);font-size:18px;font-weight:700;margin-bottom:10px;">Built for agencies & MCNs</div>
+            <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:16px;">Deploy Flexer under your own brand for your entire talent roster. One-off setup fee. Your logo. Your domain. Your client relationships protected.</div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--text2);margin-bottom:6px;">Setup fee from <span style="color:var(--gold);font-size:16px;font-weight:700;">R45,000</span></div>
+            <div style="font-family:var(--mono);font-size:12px;color:var(--text2);">Monthly licensing from <span style="color:var(--accent);font-size:16px;font-weight:700;">R8,500/mo</span></div>
+          </div>
+          <div>
+            <button class="btn-primary" style="width:100%;margin-bottom:10px;" onclick="showToast('White-label enquiry sent! We will be in touch within 48hrs. 🤝','ok')">Request White-Label Demo →</button>
+            <div style="font-size:12px;color:var(--text3);text-align:center;font-family:var(--mono);">Includes: setup, branding, onboarding, SLA support</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ SETTINGS ══ -->
+    <div class="page" id="page-settings">
+      <div class="topbar fade-in">
+        <div>
+          <div class="page-title">Settings</div>
+          <div class="page-sub">Manage your account, notifications, and security preferences</div>
+        </div>
+      </div>
+      <div class="two-col fade-in-1">
+        <div>
+          <div class="card">
+            <div class="settings-section-title">Account</div>
+            <div class="settings-item">
+              <div class="settings-item-body">
+                <div class="settings-item-title">Display Name</div>
+                <div class="settings-item-desc">Acaylia</div>
+              </div>
+              <div class="settings-item-right"><button class="topbar-btn" onclick="showToast('Edit mode enabled!','ok')">Edit</button></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-body">
+                <div class="settings-item-title">Email Address</div>
+                <div class="settings-item-desc">acaylia@flexer.app</div>
+              </div>
+              <div class="settings-item-right"><button class="topbar-btn" onclick="showToast('Verification email sent!','ok')">Change</button></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-body">
+                <div class="settings-item-title">Password</div>
+                <div class="settings-item-desc">Last changed 14 days ago</div>
+              </div>
+              <div class="settings-item-right"><button class="topbar-btn" onclick="showToast('Password reset email sent!','ok')">Reset</button></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-body">
+                <div class="settings-item-title">Current Plan</div>
+                <div class="settings-item-desc" style="color:var(--accent)">Pro — R349/month</div>
+              </div>
+              <div class="settings-item-right"><button class="topbar-btn" onclick="showPage('subscription',document.querySelectorAll('.nav-item')[8])">Manage</button></div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="card">
+            <div class="settings-section-title">Notifications</div>
+            <div class="settings-item">
+              <div class="settings-item-body">
+                <div class="settings-item-title">High severity alerts</div>
+                <div class="settings-item-desc">Push notification + email immediately</div>
+              </div>
+              <div class="settings-item-right"><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-body">
+                <div class="settings-item-title">Phishing detections</div>
+                <div class="settings-item-desc">Email notification within 5 minutes</div>
+              </div>
+              <div class="settings-item-right"><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-body">
+                <div class="settings-item-title">Weekly security report</div>
+                <div class="settings-item-desc">Summary of your security status every Monday</div>
+              </div>
+              <div class="settings-item-right"><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-body">
+                <div class="settings-item-title">Team access changes</div>
+                <div class="settings-item-desc">Notify when access is granted or revoked</div>
+              </div>
+              <div class="settings-item-right"><div class="toggle" onclick="this.classList.toggle('on')"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="card fade-in-2">
+        <div class="settings-section-title">Security Preferences</div>
+        <div class="two-col" style="margin-bottom:0;">
+          <div>
+            <div class="settings-item">
+              <div class="settings-item-body">
+                <div class="settings-item-title">Login anomaly detection</div>
+                <div class="settings-item-desc">Flag unusual login locations and devices</div>
+              </div>
+              <div class="settings-item-right"><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-body">
+                <div class="settings-item-title">Auto-breach scan</div>
+                <div class="settings-item-desc">Daily credential breach database check</div>
+              </div>
+              <div class="settings-item-right"><div class="toggle on" onclick="this.classList.toggle('on')"></div></div>
+            </div>
+          </div>
+          <div>
+            <div class="settings-item">
+              <div class="settings-item-body">
+                <div class="settings-item-title">Trusted locations</div>
+                <div class="settings-item-desc">3 locations saved (Cape Town, Johannesburg, London)</div>
+              </div>
+              <div class="settings-item-right"><button class="topbar-btn" onclick="showToast('Location manager coming soon!','ok')">Manage</button></div>
+            </div>
+            <div class="settings-item">
+              <div class="settings-item-body">
+                <div class="settings-item-title">Export incident log</div>
+                <div class="settings-item-desc">Download full security history as PDF</div>
+              </div>
+              <div class="settings-item-right"><button class="topbar-btn" onclick="showToast('Generating your incident report...','ok')">Export</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+// ══ DATA ═══════════════════════════════════════════════════════
+const tfaAccounts = [
+  { icon:'📸', name:'Instagram', code:'482 916', seconds:23 },
+  { icon:'🎵', name:'TikTok', code:'731 042', seconds:11 },
+  { icon:'▶️', name:'YouTube', code:'295 487', seconds:47 },
+  { icon:'𝕏', name:'X / Twitter', code:'108 753', seconds:38 },
+  { icon:'💼', name:'LinkedIn', code:'624 391', seconds:7 },
+];
+
+// ══ SPLASH ═════════════════════════════════════════════════════
+function doLogin() {
+  const splash = document.getElementById('splash');
+  splash.style.transition = 'opacity .5s ease';
+  splash.style.opacity = '0';
+  setTimeout(() => {
+    splash.style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    buildTFA();
+    startTFATimer();
+  }, 500);
+}
+document.getElementById('loginPass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+
+// ══ NAVIGATION ═════════════════════════════════════════════════
+function showPage(name, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  const page = document.getElementById('page-'+name);
+  if(page) page.classList.add('active');
+  if(navEl) navEl.classList.add('active');
+}
+
+// ══ MODALS ═════════════════════════════════════════════════════
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if(e.target===o) o.classList.remove('open'); });
+});
+
+function openThreatModal(title, desc, severity) {
+  document.getElementById('threatModalTitle').textContent = title;
+  document.getElementById('threatModalDesc').textContent = desc;
+  const body = document.getElementById('threatModalBody');
+  body.innerHTML = `
+    <div style="background:var(--bg3);border-radius:10px;padding:16px;margin-bottom:16px;">
+      <div style="font-family:var(--mono);font-size:11px;color:var(--text3);margin-bottom:10px;letter-spacing:1px;">THREAT DETAILS</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div><div style="font-size:11px;color:var(--text3);margin-bottom:3px;">Severity</div>
+          <div style="font-size:13px;color:${severity==='high'?'var(--danger)':severity==='med'?'var(--warn)':'var(--ok)'};font-weight:600;text-transform:uppercase;">${severity}</div></div>
+        <div><div style="font-size:11px;color:var(--text3);margin-bottom:3px;">Detected</div>
+          <div style="font-size:13px;color:var(--text2);">Just now</div></div>
+        <div><div style="font-size:11px;color:var(--text3);margin-bottom:3px;">Status</div>
+          <div style="font-size:13px;color:var(--warn);">Active · Unresolved</div></div>
+        <div><div style="font-size:11px;color:var(--text3);margin-bottom:3px;">Auto-logged</div>
+          <div style="font-size:13px;color:var(--ok);">Yes ✓</div></div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.6;">
+      Immediate recommended action: follow the Recovery Playbook step-by-step to secure your account. 
+      All session data has been logged as evidence.
+    </div>`;
+  openModal('threatModal');
+}
+
+function markResolved() {
+  closeModal('threatModal');
+  showToast('Threat marked as resolved and logged. ✓','ok');
+}
+
+// ══ ACCESS ═════════════════════════════════════════════════════
+function addAccess() {
+  closeModal('accessModal');
+  showToast('Invite sent! They will receive access instructions by email. 🔐','ok');
+}
+function revokeAccess(btn, name) {
+  btn.closest('.access-item').style.opacity = '.3';
+  btn.closest('.access-item').style.pointerEvents = 'none';
+  showToast(`${name}'s access has been revoked immediately. 🚫`,'ok');
+}
+
+// ══ SCANNER ════════════════════════════════════════════════════
+function runScan() {
+  const input = document.getElementById('scanInput').value.trim();
+  closeModal('scanModal');
+  if(!input) { showToast('Paste some content to scan first.','warn'); return; }
+  showToast('Scanning for phishing patterns...','ok');
+  setTimeout(() => showToast('⚠ Suspicious patterns detected! Check the results.','warn'), 1800);
+}
+
+// ══ 2FA ════════════════════════════════════════════════════════
+function buildTFA() {
+  const list = document.getElementById('tfaList');
+  list.innerHTML = tfaAccounts.map((a,i) => `
+    <div class="tfa-item" id="tfa-${i}">
+      <div class="tfa-icon">${a.icon}</div>
+      <div class="tfa-name">${a.name}</div>
+      <div class="tfa-code" onclick="copyCode('${a.code}')" title="Click to copy">${a.code}</div>
+      <div class="tfa-timer" id="tfa-timer-${i}">
+        <svg width="32" height="32" viewBox="0 0 32 32">
+          <circle cx="16" cy="16" r="12" fill="none" stroke="var(--border2)" stroke-width="3"/>
+          <circle cx="16" cy="16" r="12" fill="none" stroke="var(--accent)" stroke-width="3"
+            stroke-dasharray="75.4" stroke-dashoffset="${75.4*(1-a.seconds/30)}" stroke-linecap="round"
+            id="tfa-arc-${i}"/>
+        </svg>
+        <div class="tfa-timer-text" id="tfa-sec-${i}">${a.seconds}s</div>
+      </div>
+    </div>`).join('');
+}
+
+function copyCode(code) {
+  navigator.clipboard?.writeText(code.replace(/\s/g,'')).catch(()=>{});
+  showToast(`Copied ${code} to clipboard ✓`,'ok');
+}
+
+let tfaSeconds = tfaAccounts.map(a => a.seconds);
+function startTFATimer() {
+  setInterval(() => {
+    tfaSeconds = tfaSeconds.map((s,i) => {
+      s--;
+      if(s <= 0) s = 30;
+      const sec = document.getElementById(`tfa-sec-${i}`);
+      const arc = document.getElementById(`tfa-arc-${i}`);
+      const codeEl = document.querySelector(`#tfa-${i} .tfa-code`);
+      if(sec) sec.textContent = s + 's';
+      if(arc) arc.setAttribute('stroke-dashoffset', 75.4*(1-s/30));
+      if(s === 30 && codeEl) {
+        const codes = ['482 916','731 042','295 487','108 753','624 391'];
+        const newCode = String(Math.floor(100000 + Math.random() * 900000)).replace(/(\d{3})(\d{3})/,'$1 $2');
+        codeEl.textContent = newCode;
+      }
+      return s;
+    });
+  }, 1000);
+}
+
+// ══ RECOVERY ════════════════════════════════════════════════════
+function markStep(btn) {
+  const step = btn.closest('.playbook-step');
+  const numEl = step.querySelector('.step-num');
+  numEl.className = 'step-num done';
+  numEl.textContent = '✓';
+  btn.textContent = 'Complete';
+  btn.className = 'step-action done';
+  btn.disabled = true;
+  // activate next
+  const next = step.nextElementSibling;
+  if(next) {
+    const nextNum = next.querySelector('.step-num');
+    if(nextNum && nextNum.classList.contains('pending')) {
+      nextNum.classList.remove('pending');
+      nextNum.classList.add('active');
+    }
+  }
+  showToast('Step completed and logged. Keep going! 💪','ok');
+}
+
+// ══ TOAST ══════════════════════════════════════════════════════
+function showToast(msg, type='ok') {
+  const wrap = document.getElementById('toastWrap');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  const icon = type==='ok'?'✅':type==='err'?'❌':'⚠️';
+  t.innerHTML = `<span>${icon}</span><span>${msg}</span>`;
+  wrap.appendChild(t);
+  setTimeout(() => { t.style.opacity='0'; t.style.transition='opacity .4s'; setTimeout(()=>t.remove(),400); }, 3500);
+}
+</script>
+</body>
+</html>
