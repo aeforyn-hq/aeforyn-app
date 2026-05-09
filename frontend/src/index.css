@@ -143,7 +143,7 @@ body::before {
   }
 
   .card {
-    @apply relative overflow-hidden rounded-card transition-all duration-250;
+    @apply relative overflow-hidden rounded-card transition-all duration-200;
     background: #0C1A0F;
     border: 1px solid rgba(45,212,191,0.10);
     padding: 28px;
