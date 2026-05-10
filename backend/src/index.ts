@@ -15,7 +15,7 @@ import userRoutes from './routes/user.js'
 import monitoringRoutes from './routes/monitoring.js'
 
 const app = express()
-
+app.set('trust proxy', 1)
 app.use(helmet())
 app.use(cors({
   origin: env.FRONTEND_URL,
