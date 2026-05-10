@@ -5,9 +5,7 @@ import { supabase } from '../db/supabase.js'
 import { env } from '../config/env.js'
 
 const router = Router()
-const stripe = env.STRIPE_SECRET_KEY 
-  ? new Stripe(env.STRIPE_SECRET_KEY)
-  : null
+const stripe = new Stripe(env.STRIPE_SECRET_KEY || 'sk_test_placeholder')
 
 const PRICE_IDS: Record<string, string> = {
   standard_monthly: process.env.STRIPE_PRICE_STANDARD_MONTHLY || 'price_standard_monthly',
