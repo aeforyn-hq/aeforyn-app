@@ -84,72 +84,80 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8">
-      {/* Stat cards row */}
+      {/* Stat cards row — all cards are clickable */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }} className="card">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold uppercase tracking-widest text-text-secondary" style={{ letterSpacing: '1.5px' }}>Security Score</span>
-            <Shield className="w-4 h-4 text-gold" />
-          </div>
-          <div className="flex justify-center">
-            <SecurityScoreRing score={d.security_score} />
-          </div>
-          <p className="text-center text-xs text-text-secondary mt-2">
-            {d.security_score >= 80 ? 'Well protected' : d.security_score >= 60 ? 'Needs attention' : 'At risk'}
-          </p>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="card">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold uppercase tracking-widest text-text-secondary" style={{ letterSpacing: '1.5px' }}>Threats Blocked</span>
-            <AlertTriangle className="w-4 h-4 text-warning-color" />
-          </div>
-          <p style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '48px', color: '#C9A84C', lineHeight: 1 }}>
-            {d.threats_summary.resolved}
-          </p>
-          <div className="mt-3 space-y-1.5">
-            {Object.entries({ critical: d.threats_summary.critical, high: d.threats_summary.high, medium: d.threats_summary.medium }).map(([k, v]) => (
-              <div key={k} className="flex items-center justify-between text-xs">
-                <span className="text-text-secondary capitalize">{k}</span>
-                <span style={{ color: severityColors[k], fontFamily: 'JetBrains Mono, monospace' }}>{v} active</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="card">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold uppercase tracking-widest text-text-secondary" style={{ letterSpacing: '1.5px' }}>Platforms</span>
-            <Activity className="w-4 h-4 text-teal" />
-          </div>
-          <p style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '48px', color: '#2DD4BF', lineHeight: 1 }}>
-            {d.platforms.length}
-          </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {d.platforms.map((p) => (
-              <div key={p.id} className="flex items-center gap-1.5">
-                <StatusDot status={p.status} size="sm" />
-                <span className="text-xs text-text-secondary capitalize">{p.platform}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="card">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-semibold uppercase tracking-widest text-text-secondary" style={{ letterSpacing: '1.5px' }}>Vault Storage</span>
-            <HardDrive className="w-4 h-4 text-gold" />
-          </div>
-          <p style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '48px', color: '#C9A84C', lineHeight: 1 }}>
-            {storagePercent}%
-          </p>
-          <div className="mt-3">
-            <ProgressBar value={storagePercent} color="gold" size="md" />
-            <p className="text-xs text-text-secondary mt-2 mono-text">
-              {formatBytes(d.storage_used)} / {formatBytes(d.storage_total)}
+        <Link to="/threats" className="block">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }} className="card cursor-pointer">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-semibold uppercase tracking-widest text-text-secondary" style={{ letterSpacing: '1.5px' }}>Security Score</span>
+              <Shield className="w-4 h-4 text-gold" />
+            </div>
+            <div className="flex justify-center">
+              <SecurityScoreRing score={d.security_score} />
+            </div>
+            <p className="text-center text-xs text-text-secondary mt-2">
+              {d.security_score >= 80 ? 'Well protected' : d.security_score >= 60 ? 'Needs attention' : 'At risk'}
             </p>
-          </div>
-        </motion.div>
+          </motion.div>
+        </Link>
+
+        <Link to="/threats" className="block">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="card cursor-pointer">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-semibold uppercase tracking-widest text-text-secondary" style={{ letterSpacing: '1.5px' }}>Threats Blocked</span>
+              <AlertTriangle className="w-4 h-4 text-warning-color" />
+            </div>
+            <p style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '48px', color: '#C9A84C', lineHeight: 1 }}>
+              {d.threats_summary.resolved}
+            </p>
+            <div className="mt-3 space-y-1.5">
+              {Object.entries({ critical: d.threats_summary.critical, high: d.threats_summary.high, medium: d.threats_summary.medium }).map(([k, v]) => (
+                <div key={k} className="flex items-center justify-between text-xs">
+                  <span className="text-text-secondary capitalize">{k}</span>
+                  <span style={{ color: severityColors[k], fontFamily: 'JetBrains Mono, monospace' }}>{v} active</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </Link>
+
+        <Link to="/monitoring" className="block">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="card cursor-pointer">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-semibold uppercase tracking-widest text-text-secondary" style={{ letterSpacing: '1.5px' }}>Platforms</span>
+              <Activity className="w-4 h-4 text-teal" />
+            </div>
+            <p style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '48px', color: '#2DD4BF', lineHeight: 1 }}>
+              {d.platforms.length}
+            </p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {d.platforms.map((p) => (
+                <div key={p.id} className="flex items-center gap-1.5">
+                  <StatusDot status={p.status} size="sm" />
+                  <span className="text-xs text-text-secondary capitalize">{p.platform}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </Link>
+
+        <Link to="/vault" className="block">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="card cursor-pointer">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-semibold uppercase tracking-widest text-text-secondary" style={{ letterSpacing: '1.5px' }}>Vault Storage</span>
+              <HardDrive className="w-4 h-4 text-gold" />
+            </div>
+            <p style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '48px', color: '#C9A84C', lineHeight: 1 }}>
+              {storagePercent}%
+            </p>
+            <div className="mt-3">
+              <ProgressBar value={storagePercent} color="gold" size="md" />
+              <p className="text-xs text-text-secondary mt-2 mono-text">
+                {formatBytes(d.storage_used)} / {formatBytes(d.storage_total)}
+              </p>
+            </div>
+          </motion.div>
+        </Link>
       </div>
 
       {/* Main content row */}

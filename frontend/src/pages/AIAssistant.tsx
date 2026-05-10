@@ -16,10 +16,10 @@ interface Message {
 }
 
 const SUGGESTED_PROMPTS = [
-  'How do I enable 2FA on Instagram?',
-  'What does a phishing email look like?',
-  'Someone logged in from another country — what do I do?',
-  "What's the safest password manager for creators?",
+  'My Instagram was hacked, what do I do?',
+  'How do I set up 2FA on TikTok?',
+  'Someone is impersonating me online',
+  'Is this brand deal email a scam?',
 ]
 
 export default function AIAssistant() {
@@ -137,7 +137,7 @@ export default function AIAssistant() {
                   key={prompt}
                   onClick={() => sendMessage(prompt)}
                   className="p-4 rounded-xl text-left text-sm text-text-primary transition-all hover:border-gold/30 group"
-                  style={{ background: '#0C1A0F', border: '1px solid rgba(201,168,76,0.15)' }}
+                  style={{ background: '#0A2422', border: '1px solid rgba(201,168,76,0.15)' }}
                 >
                   <Sparkles className="w-4 h-4 text-gold mb-2 group-hover:text-gold-light transition-colors" />
                   {prompt}
@@ -175,8 +175,8 @@ export default function AIAssistant() {
               <div
                 className="max-w-[85%] rounded-2xl px-5 py-4"
                 style={msg.role === 'user'
-                  ? { background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#050D0A' }
-                  : { background: '#0C1A0F', border: '1px solid rgba(45,212,191,0.12)', borderLeft: '3px solid rgba(45,212,191,0.4)' }
+                  ? { background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#071E1C' }
+                  : { background: '#0A2422', border: '1px solid rgba(45,212,191,0.12)', borderLeft: '3px solid rgba(45,212,191,0.4)' }
                 }
               >
                 <p
@@ -198,7 +198,7 @@ export default function AIAssistant() {
               <Bot className="w-4 h-4 text-teal" />
             </div>
             <div className="max-w-[85%] rounded-2xl px-5 py-4"
-              style={{ background: '#0C1A0F', border: '1px solid rgba(45,212,191,0.12)', borderLeft: '3px solid rgba(45,212,191,0.4)' }}>
+              style={{ background: '#0A2422', border: '1px solid rgba(45,212,191,0.12)', borderLeft: '3px solid rgba(45,212,191,0.4)' }}>
               {streamingContent ? (
                 <p className="text-sm text-text-primary leading-relaxed whitespace-pre-wrap"
                   style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', lineHeight: '1.7' }}>
@@ -226,7 +226,7 @@ export default function AIAssistant() {
       {/* Input bar */}
       <div className="flex-shrink-0 pt-4" style={{ borderTop: '1px solid rgba(45,212,191,0.08)' }}>
         <div className="flex items-end gap-3 p-4 rounded-2xl"
-          style={{ background: '#0C1A0F', border: '1px solid rgba(45,212,191,0.15)' }}>
+          style={{ background: '#0A2422', border: '1px solid rgba(45,212,191,0.15)' }}>
           <textarea
             ref={inputRef}
             value={input}
@@ -246,7 +246,7 @@ export default function AIAssistant() {
               cursor: input.trim() && !loading ? 'pointer' : 'not-allowed',
             }}
           >
-            <Send className="w-4 h-4" style={{ color: input.trim() && !loading ? '#050D0A' : '#9A7A35' }} />
+            <Send className="w-4 h-4" style={{ color: input.trim() && !loading ? '#071E1C' : '#9A7A35' }} />
           </button>
         </div>
         <p className="text-center text-xs text-text-secondary mt-2">

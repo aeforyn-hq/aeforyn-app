@@ -9,11 +9,11 @@ interface AuthLayoutProps {
 
 export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex" style={{ background: '#050D0A' }}>
+    <div className="min-h-screen flex" style={{ background: '#071E1C' }}>
       {/* Left panel */}
       <div
         className="hidden lg:flex w-[55%] flex-col items-center justify-center relative overflow-hidden"
-        style={{ background: '#050D0A' }}
+        style={{ background: '#071E1C' }}
       >
         {/* Radial glow */}
         <div
@@ -93,7 +93,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
       {/* Right panel */}
       <div
         className="flex-1 flex items-center justify-center p-8"
-        style={{ background: '#081208' }}
+        style={{ background: '#051614' }}
       >
         <motion.div
           initial={{ opacity: 0, x: 20 }}
@@ -109,7 +109,7 @@ export function AuthLayout({ children, title, subtitle }: AuthLayoutProps) {
           <div
             className="rounded-2xl p-8"
             style={{
-              background: '#0C1A0F',
+              background: '#0A2422',
               border: '1px solid rgba(201,168,76,0.15)',
               borderTop: '1px solid rgba(201,168,76,0.4)',
             }}

@@ -4,7 +4,7 @@ import { ArrowLeft } from 'lucide-react'
 
 export default function Privacy() {
   return (
-    <div className="min-h-screen" style={{ background: '#050D0A' }}>
+    <div className="min-h-screen" style={{ background: '#071E1C' }}>
       {/* Header */}
       <header className="border-b px-8 py-5 flex items-center justify-between" style={{ borderColor: 'rgba(45,212,191,0.08)' }}>
         <AeforynLogo size="sm" showWordmark />

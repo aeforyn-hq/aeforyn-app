@@ -52,7 +52,7 @@ export const AeforynLogo: React.FC<AeforynLogoProps> = ({
         />
         <polygon
           points="24,8 29.5,11 29.5,17 24,20 18.5,17 18.5,11"
-          fill="#050D0A"
+          fill="#071E1C"
           opacity="0.3"
         />
         {/* Bottom-left hexagon */}
@@ -62,7 +62,7 @@ export const AeforynLogo: React.FC<AeforynLogoProps> = ({
         />
         <polygon
           points="16,24 21.5,27 21.5,33 16,36 10.5,33 10.5,27"
-          fill="#050D0A"
+          fill="#071E1C"
           opacity="0.3"
         />
         {/* Bottom-right hexagon */}
@@ -72,7 +72,7 @@ export const AeforynLogo: React.FC<AeforynLogoProps> = ({
         />
         <polygon
           points="32,24 37.5,27 37.5,33 32,36 26.5,33 26.5,27"
-          fill="#050D0A"
+          fill="#071E1C"
           opacity="0.3"
         />
       </svg>

@@ -390,7 +390,7 @@ export default function Recovery() {
               style={{
                 fontFamily: 'Space Grotesk, sans-serif',
                 fontSize: '16px',
-                background: selectedPlatform === p.id ? 'rgba(201,168,76,0.1)' : '#0C1A0F',
+                background: selectedPlatform === p.id ? 'rgba(201,168,76,0.1)' : '#0A2422',
                 border: `1px solid ${selectedPlatform === p.id ? 'rgba(201,168,76,0.5)' : 'rgba(45,212,191,0.1)'}`,
                 color: selectedPlatform === p.id ? '#C9A84C' : '#F0FDF4',
               }}
@@ -415,7 +415,7 @@ export default function Recovery() {
                   onClick={() => setSelectedIncident(incident.id)}
                   className="w-full flex items-center justify-between p-4 rounded-xl text-left transition-all duration-150"
                   style={{
-                    background: selectedIncident === incident.id ? 'rgba(201,168,76,0.08)' : '#0C1A0F',
+                    background: selectedIncident === incident.id ? 'rgba(201,168,76,0.08)' : '#0A2422',
                     border: `1px solid ${selectedIncident === incident.id ? 'rgba(201,168,76,0.4)' : 'rgba(45,212,191,0.08)'}`,
                   }}
                 >
@@ -466,7 +466,7 @@ export default function Recovery() {
             <div className="mt-2 space-y-2">
               {sessions.map((session) => (
                 <div key={session.id} className="flex items-center justify-between p-4 rounded-xl"
-                  style={{ background: '#0C1A0F', border: '1px solid rgba(45,212,191,0.06)' }}>
+                  style={{ background: '#0A2422', border: '1px solid rgba(45,212,191,0.06)' }}>
                   <div>
                     <p className="text-sm font-medium text-text-primary capitalize">
                       {PLATFORM_LABELS[session.platform] || session.platform} — {session.incident_type.replace(/_/g, ' ')}

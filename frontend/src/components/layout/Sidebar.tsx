@@ -37,7 +37,7 @@ export function Sidebar() {
   return (
     <aside
       className="w-[260px] flex-shrink-0 flex flex-col h-full border-r"
-      style={{ background: '#081208', borderColor: 'rgba(45,212,191,0.08)' }}
+      style={{ background: '#051614', borderColor: 'rgba(45,212,191,0.08)' }}
     >
       {/* Logo */}
       <div className="p-6 pb-4 border-b" style={{ borderColor: 'rgba(45,212,191,0.08)' }}>
@@ -52,7 +52,7 @@ export function Sidebar() {
         >
           <div
             className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#050D0A' }}
+            style={{ background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#071E1C' }}
           >
             {initials}
           </div>

@@ -3,11 +3,11 @@
 @tailwind utilities;
 
 :root {
-  --bg-primary:      #050D0A;
-  --bg-secondary:    #081208;
-  --bg-card:         #0C1A0F;
-  --bg-card-hover:   #102015;
-  --bg-input:        #0A1710;
+  --bg-primary:      #071E1C;
+  --bg-secondary:    #051614;
+  --bg-card:         #0A2422;
+  --bg-card-hover:   #0D2E2B;
+  --bg-input:        #091F1D;
   --gold:            #C9A84C;
   --gold-light:      #E4C46A;
   --gold-dim:        #9A7A35;
@@ -46,15 +46,47 @@ body {
   min-height: 100vh;
 }
 
-/* Noise texture overlay */
+/* Animated hex grid background layer */
 body::before {
   content: '';
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.02'/%3E%3C/svg%3E");
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='104' viewBox='0 0 60 104'%3E%3Cpolygon points='30,2 58,17 58,47 30,62 2,47 2,17' fill='none' stroke='%231AE8A0' stroke-width='0.6' stroke-opacity='0.04'/%3E%3Cpolygon points='30,52 58,67 58,97 30,112 2,97 2,67' fill='none' stroke='%231AE8A0' stroke-width='0.6' stroke-opacity='0.04'/%3E%3C/svg%3E");
+  background-size: 60px 104px;
   pointer-events: none;
-  z-index: 9999;
-  opacity: 0.02;
+  z-index: 0;
+  animation: hex-drift 60s linear infinite;
+}
+
+@keyframes hex-drift {
+  0% { background-position: 0 0; }
+  100% { background-position: 60px 104px; }
+}
+
+/* Floating glow nodes */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background:
+    radial-gradient(ellipse 120px 120px at 15% 20%, rgba(26,232,160,0.035) 0%, transparent 70%),
+    radial-gradient(ellipse 80px 80px at 75% 60%, rgba(201,168,76,0.03) 0%, transparent 70%),
+    radial-gradient(ellipse 100px 100px at 50% 85%, rgba(26,232,160,0.025) 0%, transparent 70%),
+    radial-gradient(ellipse 60px 60px at 88% 15%, rgba(201,168,76,0.025) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  animation: nodes-pulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes nodes-pulse {
+  0% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+#root {
+  position: relative;
+  z-index: 1;
 }
 
 /* Custom scrollbar */
@@ -144,8 +176,8 @@ body::before {
 
   .card {
     @apply relative overflow-hidden rounded-card transition-all duration-200;
-    background: #0C1A0F;
-    border: 1px solid rgba(45,212,191,0.10);
+    background: #0A2422;
+    border: 1px solid rgba(201,168,76,0.15);
     padding: 28px;
   }
   .card::before {
@@ -158,8 +190,9 @@ body::before {
     transition: opacity 0.25s ease;
   }
   .card:hover {
-    border-color: rgba(201,168,76,0.25);
-    background: #102015;
+    border-color: rgba(201,168,76,0.30);
+    background: #0D2E2B;
+    box-shadow: 0 0 12px rgba(201,168,76,0.12);
   }
   .card:hover::before {
     opacity: 1;
@@ -167,14 +200,14 @@ body::before {
 
   .card-static {
     @apply relative overflow-hidden rounded-card;
-    background: #0C1A0F;
-    border: 1px solid rgba(45,212,191,0.10);
+    background: #0A2422;
+    border: 1px solid rgba(201,168,76,0.15);
     padding: 28px;
   }
 
   .input-field {
     @apply w-full rounded-[10px] px-4 py-3 text-sm transition-all duration-200;
-    background: #0A1710;
+    background: #091F1D;
     border: 1px solid rgba(45,212,191,0.20);
     color: #F0FDF4;
     font-family: 'Inter', sans-serif;
@@ -226,6 +259,20 @@ body::before {
 
   .mono-text {
     font-family: 'JetBrains Mono', monospace;
+  }
+
+  .heading-gold {
+    background: linear-gradient(135deg, #E4C46A 0%, #C9A84C 40%, #9A7A35 70%, #C9A84C 100%);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gold-shimmer 4s linear infinite;
+  }
+
+  @keyframes gold-shimmer {
+    0% { background-position: 0% center; }
+    100% { background-position: 200% center; }
   }
 
   .heading-hero {

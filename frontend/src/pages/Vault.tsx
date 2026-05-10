@@ -203,7 +203,7 @@ export default function Vault() {
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ delay: i * 0.04 }}
                   className="group relative rounded-2xl p-5 transition-all duration-200 hover:border-gold/25"
-                  style={{ background: '#0C1A0F', border: '1px solid rgba(45,212,191,0.08)' }}
+                  style={{ background: '#0A2422', border: '1px solid rgba(45,212,191,0.08)' }}
                 >
                   <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-4" style={{ background: `${color}15` }}>
                     <IconComp className="w-6 h-6" style={{ color }} />
