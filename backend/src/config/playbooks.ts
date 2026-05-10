@@ -1,0 +1,735 @@
+export interface RecoveryStep {
+  id: number
+  title: string
+  description: string
+  instructions: string[]
+  estimated_minutes: number
+}
+
+export interface RecoveryPlaybook {
+  platform: string
+  incident_type: string
+  title: string
+  description: string
+  steps: RecoveryStep[]
+}
+
+export const RECOVERY_PLAYBOOKS: RecoveryPlaybook[] = [
+  {
+    platform: 'instagram',
+    incident_type: 'account_hacked',
+    title: 'Instagram Account Compromised',
+    description: 'Your Instagram account has been accessed by someone else. Follow these steps in order.',
+    steps: [
+      {
+        id: 1,
+        title: 'Secure your email account first',
+        description: 'Your Instagram password reset goes to your email. If they have your email too, you\'ll lose access again immediately.',
+        instructions: [
+          'Go to your email provider (Gmail, Outlook, etc.) on a trusted device',
+          'Change your email password immediately — use a new, unique password',
+          'Enable 2FA on your email if not already active',
+          'Check for any recovery email or phone number you don\'t recognise and remove it',
+          'Sign out all other sessions on your email account',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 2,
+        title: 'Use Instagram\'s official account recovery',
+        description: 'Instagram has a dedicated recovery page. Do not use any third-party recovery services.',
+        instructions: [
+          'Go to instagram.com/hacked on a trusted device',
+          'Tap "My account was hacked"',
+          'Follow the identity verification prompts',
+          'Instagram may ask you to verify via phone number or email',
+          'If prompted for a selfie video, record it in good lighting',
+          'Do NOT pay anyone claiming they can recover your account',
+        ],
+        estimated_minutes: 15,
+      },
+      {
+        id: 3,
+        title: 'Revoke all active sessions',
+        description: 'Once you have access back, log out every unknown device immediately.',
+        instructions: [
+          'Go to your Instagram profile → Settings',
+          'Tap Security → Login Activity',
+          'Review every device and location listed',
+          'Tap any suspicious device and select "Log Out"',
+          'Log out of all locations you don\'t recognise',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 4,
+        title: 'Change your password immediately',
+        description: 'Your old password is compromised. Replace it with something completely new.',
+        instructions: [
+          'Go to Settings → Security → Password',
+          'Create a new password of at least 20 characters',
+          'Use a mix of uppercase, lowercase, numbers, and symbols',
+          'Never reuse a password from any other site',
+          'Save it in a password manager (1Password, Bitwarden)',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 5,
+        title: 'Enable two-factor authentication',
+        description: 'SMS 2FA is not enough. Use an authenticator app.',
+        instructions: [
+          'Go to Settings → Security → Two-Factor Authentication',
+          'Select "Authentication App" (not SMS)',
+          'Install Google Authenticator or Authy if you don\'t have one',
+          'Scan the QR code shown on Instagram',
+          'Save your backup codes offline — upload them to your AEFORYN vault',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 6,
+        title: 'Audit connected apps and revoke suspicious ones',
+        description: 'Hackers often grant themselves access through third-party apps.',
+        instructions: [
+          'Go to Settings → Security → Apps and Websites',
+          'Review the Active tab carefully',
+          'Remove any app you didn\'t personally authorise',
+          'Remove any app you don\'t recognise or haven\'t used recently',
+          'Check the Expired tab and clean those out too',
+        ],
+        estimated_minutes: 5,
+      },
+    ],
+  },
+  {
+    platform: 'instagram',
+    incident_type: 'cant_login',
+    title: 'Can\'t Log In to Instagram',
+    description: 'You\'re locked out of your Instagram account. Let\'s get you back in.',
+    steps: [
+      {
+        id: 1,
+        title: 'Try the standard "Forgot password" flow',
+        description: 'This is the fastest route if your email and phone are still accessible.',
+        instructions: [
+          'On the Instagram login screen, tap "Forgot password?"',
+          'Enter your email address, phone number, or username',
+          'Check your email or SMS for a reset link',
+          'Click the link within 10 minutes before it expires',
+          'Create a new strong password immediately',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 2,
+        title: 'Try logging in via Facebook',
+        description: 'If your accounts are linked, Facebook can grant access.',
+        instructions: [
+          'On the Instagram login screen, tap "Log in with Facebook"',
+          'This works if you previously linked your accounts',
+          'Once logged in, immediately update your email and password',
+        ],
+        estimated_minutes: 3,
+      },
+      {
+        id: 3,
+        title: 'Request a login link via email',
+        description: 'Instagram can send a magic link directly to your registered email.',
+        instructions: [
+          'On the login screen, tap "Get more help"',
+          'Select "Send an email"',
+          'Check your inbox for a login link from Instagram',
+          'Open the link within the time limit',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 4,
+        title: 'Use video selfie verification',
+        description: 'If other methods fail, Instagram\'s video selfie can verify your identity.',
+        instructions: [
+          'On the login screen, tap "Get more help"',
+          'Select "Need more help"',
+          'Instagram may prompt you to record a video selfie',
+          'Record the video in good, even lighting',
+          'Make sure your face is clearly visible and matches your profile photos',
+          'Allow 24-48 hours for Instagram to review',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 5,
+        title: 'Contact Instagram Support directly',
+        description: 'If all else fails, submit a support request.',
+        instructions: [
+          'Go to instagram.com/hacked',
+          'Select the option that best describes your situation',
+          'Submit all requested information accurately',
+          'Be patient — responses can take 3-7 business days',
+          'Do not submit multiple requests as this resets the queue',
+        ],
+        estimated_minutes: 15,
+      },
+    ],
+  },
+  {
+    platform: 'instagram',
+    incident_type: 'posts_deleted',
+    title: 'Instagram Posts Deleted',
+    description: 'Posts or content has been removed from your account.',
+    steps: [
+      {
+        id: 1,
+        title: 'Check your Recently Deleted folder',
+        description: 'Instagram keeps deleted content for 30 days before permanent removal.',
+        instructions: [
+          'Go to your Instagram profile',
+          'Tap the hamburger menu (three lines) → Your Activity',
+          'Tap "Recently Deleted"',
+          'Select posts, stories, or reels you want to restore',
+          'Tap "Restore" on each item',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 2,
+        title: 'Check if your account was compromised',
+        description: 'If you didn\'t delete the posts, someone else may have.',
+        instructions: [
+          'Go to Settings → Security → Login Activity',
+          'Look for any unrecognised devices or locations',
+          'If you see suspicious activity, follow the Account Hacked recovery playbook',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 3,
+        title: 'Check if content was removed by Instagram',
+        description: 'Instagram may have removed content that violated their guidelines.',
+        instructions: [
+          'Go to Settings → Help → Support Requests → Violations',
+          'Review any policy violation notices',
+          'If you believe removal was an error, tap "Disagree with Decision"',
+          'Submit an appeal explaining why the content does not violate guidelines',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 4,
+        title: 'Restore from your AEFORYN vault backup',
+        description: 'If you had content backed up to your vault, restore it from there.',
+        instructions: [
+          'Go to your AEFORYN Vault',
+          'Locate the content you need to restore',
+          'Download the files to your device',
+          'Re-upload the content to Instagram',
+          'Note: Re-uploaded posts will have today\'s date, not the original',
+        ],
+        estimated_minutes: 20,
+      },
+      {
+        id: 5,
+        title: 'Request your data archive from Instagram',
+        description: 'Instagram can provide a copy of your historical data.',
+        instructions: [
+          'Go to Settings → Your Activity → Download Your Information',
+          'Select "Download or Transfer Information"',
+          'Choose your account and select "All Available Information"',
+          'Select "Download to Device"',
+          'Instagram will email you a download link within 48 hours',
+        ],
+        estimated_minutes: 5,
+      },
+    ],
+  },
+  {
+    platform: 'instagram',
+    incident_type: 'account_suspended',
+    title: 'Instagram Account Suspended',
+    description: 'Your Instagram account has been disabled or suspended.',
+    steps: [
+      {
+        id: 1,
+        title: 'Understand why your account was disabled',
+        description: 'Determine whether this is a temporary ban or a permanent disable.',
+        instructions: [
+          'Try to log in — Instagram usually shows a message explaining the disable',
+          'Check your email registered to Instagram for any violation notices',
+          'Temporary bans last 1-72 hours and are usually for spam-like activity',
+          'Permanent disables are for repeated or severe violations',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 2,
+        title: 'Submit a disability appeal',
+        description: 'You can appeal most account disables through Instagram\'s official process.',
+        instructions: [
+          'On the "Your account has been disabled" screen, tap "Learn More"',
+          'Tap "Request a Review"',
+          'Follow the steps to verify your identity',
+          'You may need to provide your phone number or email',
+          'Submit the review request and wait 24-72 hours',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 3,
+        title: 'Prepare your appeal statement',
+        description: 'A well-written appeal increases your chance of reinstatement.',
+        instructions: [
+          'Clearly state that you believe the disable was a mistake',
+          'Mention your account age and history as a creator',
+          'Reference the specific content or action you believe triggered the disable',
+          'Keep your appeal professional and brief',
+          'Do not threaten legal action in your initial appeal',
+        ],
+        estimated_minutes: 15,
+      },
+      {
+        id: 4,
+        title: 'Try the Instagram Help Centre directly',
+        description: 'If in-app appeals are unavailable, use the web form.',
+        instructions: [
+          'Go to help.instagram.com on a computer',
+          'Navigate to "Privacy and Safety Centre"',
+          'Find the "Report a hacked account" or "Disabled accounts" section',
+          'Submit the appropriate form with your account details',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 5,
+        title: 'Back up your content for a new start',
+        description: 'If the account cannot be recovered, prepare to rebuild.',
+        instructions: [
+          'If you still have partial access, download your data archive',
+          'Contact your followers via other platforms to explain',
+          'Create a new account with a clear, policy-compliant approach',
+          'Upload all recovered content to your AEFORYN vault before re-posting',
+        ],
+        estimated_minutes: 30,
+      },
+    ],
+  },
+  {
+    platform: 'instagram',
+    incident_type: 'impersonation',
+    title: 'Instagram Impersonation',
+    description: 'Someone has created a fake account pretending to be you.',
+    steps: [
+      {
+        id: 1,
+        title: 'Document the fake account',
+        description: 'Before reporting, collect evidence of the impersonation.',
+        instructions: [
+          'Take screenshots of the fake account\'s profile, bio, and posts',
+          'Note the fake account\'s username exactly',
+          'Save screenshots of any messages the impersonator has sent to your followers',
+          'Record the URL of the fake account',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 2,
+        title: 'Report the account to Instagram',
+        description: 'Instagram takes impersonation reports seriously.',
+        instructions: [
+          'Go to the fake account\'s profile',
+          'Tap the three dots (⋯) menu',
+          'Select "Report"',
+          'Select "It\'s pretending to be someone else"',
+          'Select "Me" if they\'re impersonating you',
+          'Submit the report and note the reference number',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 3,
+        title: 'Submit a formal impersonation report',
+        description: 'For faster resolution, use Instagram\'s dedicated impersonation form.',
+        instructions: [
+          'Go to help.instagram.com',
+          'Search for "Report an impersonation account"',
+          'Fill in the dedicated impersonation form',
+          'Upload your government-issued ID to verify your identity',
+          'Provide screenshots of the fake account',
+        ],
+        estimated_minutes: 15,
+      },
+      {
+        id: 4,
+        title: 'Notify your followers',
+        description: 'Warn your community about the fake account to prevent scams.',
+        instructions: [
+          'Post a story warning your followers about the impersonator',
+          'Clearly state your only official account username',
+          'Tell followers never to send money or personal info to anyone claiming to be you',
+          'Pin a post with your official account information',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 5,
+        title: 'Get Instagram\'s verified badge',
+        description: 'A verified badge helps followers identify your real account.',
+        instructions: [
+          'Go to Settings → Account → Request Verification',
+          'Submit your full name, account category, and a government ID',
+          'Instagram reviews requests within 30 days',
+          'If denied, you can reapply after 30 days',
+          'Continue reporting the fake account every 7 days until it is removed',
+        ],
+        estimated_minutes: 15,
+      },
+    ],
+  },
+  {
+    platform: 'tiktok',
+    incident_type: 'account_hacked',
+    title: 'TikTok Account Compromised',
+    description: 'Your TikTok account has been accessed without your permission.',
+    steps: [
+      {
+        id: 1,
+        title: 'Secure your linked email and phone',
+        description: 'TikTok accounts are linked to email or phone. Secure those first.',
+        instructions: [
+          'Change your email password immediately on a trusted device',
+          'Check your phone for any SIM swap notifications',
+          'Enable 2FA on your email account',
+          'Remove any unrecognised recovery options from your email',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 2,
+        title: 'Use TikTok\'s account recovery',
+        description: 'TikTok has a specific recovery process for compromised accounts.',
+        instructions: [
+          'On the login screen, tap "Use phone/email/username"',
+          'Enter your username or email, then tap "Forgot password"',
+          'Choose to receive a verification code via email or SMS',
+          'Enter the code within 60 seconds',
+          'Create a new strong password',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 3,
+        title: 'Remove all unrecognised devices',
+        description: 'Sign out of every device and location that isn\'t yours.',
+        instructions: [
+          'Go to Profile → Settings → Security',
+          'Tap "Manage devices"',
+          'Review all logged-in devices',
+          'Remove any device you don\'t recognise by tapping it and selecting "Remove"',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 4,
+        title: 'Enable two-step verification',
+        description: 'TikTok supports multiple 2FA methods — use an authenticator app.',
+        instructions: [
+          'Go to Profile → Settings → Security → 2-step verification',
+          'Add your phone number as one method',
+          'Add an authenticator app as a second method',
+          'Save your backup codes securely in your AEFORYN vault',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 5,
+        title: 'Review and revoke connected apps',
+        description: 'Remove any third-party apps you didn\'t explicitly authorise.',
+        instructions: [
+          'Go to Settings → Privacy → Connected Apps',
+          'Review all listed apps',
+          'Tap "Revoke" on any app you don\'t recognise or trust',
+        ],
+        estimated_minutes: 5,
+      },
+    ],
+  },
+  {
+    platform: 'youtube',
+    incident_type: 'account_hacked',
+    title: 'YouTube Channel Compromised',
+    description: 'Your YouTube channel or Google account has been accessed without your permission.',
+    steps: [
+      {
+        id: 1,
+        title: 'Secure your Google account immediately',
+        description: 'YouTube runs on Google. Securing your Google account secures YouTube.',
+        instructions: [
+          'Go to myaccount.google.com on a trusted device',
+          'Navigate to Security → Recent security activity',
+          'If you see unrecognised activity, tap "No, secure account"',
+          'Follow Google\'s prompts to secure the account',
+          'Change your Google account password immediately',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 2,
+        title: 'Review and remove unfamiliar account access',
+        description: 'Check which apps and devices have access to your Google account.',
+        instructions: [
+          'Go to myaccount.google.com → Security → Your devices',
+          'Sign out of all devices you don\'t recognise',
+          'Go to Third-party apps with account access',
+          'Remove any suspicious apps or services',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 3,
+        title: 'Enable Google\'s Advanced Protection Program',
+        description: 'For creators, Advanced Protection is the strongest option available.',
+        instructions: [
+          'Go to landing.google.com/advancedprotection',
+          'You\'ll need a physical security key (YubiKey or Google Titan)',
+          'Follow the enrolment steps',
+          'This prevents account takeovers even if someone has your password',
+        ],
+        estimated_minutes: 20,
+      },
+      {
+        id: 4,
+        title: 'Check your YouTube channel settings for changes',
+        description: 'Hackers often add channel managers or change monetisation settings.',
+        instructions: [
+          'Go to YouTube Studio → Settings → Permissions',
+          'Remove any unrecognised email addresses with channel access',
+          'Check Settings → Channel → Basic Info for any changes to your description or links',
+          'Review any scheduled or new uploads you didn\'t create',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 5,
+        title: 'Remove any content uploaded by the hacker',
+        description: 'Hackers sometimes upload scam or spam videos to creator channels.',
+        instructions: [
+          'Go to YouTube Studio → Content',
+          'Look for any videos you didn\'t upload',
+          'Select those videos and delete them immediately',
+          'Report the situation to YouTube via the Help Centre',
+        ],
+        estimated_minutes: 15,
+      },
+    ],
+  },
+  {
+    platform: 'x',
+    incident_type: 'account_hacked',
+    title: 'X (Twitter) Account Compromised',
+    description: 'Your X account has been accessed without your permission.',
+    steps: [
+      {
+        id: 1,
+        title: 'Reset your X password via email',
+        description: 'Use X\'s password reset to regain control immediately.',
+        instructions: [
+          'Go to x.com/account/begin_password_reset',
+          'Enter your email address, phone number, or username',
+          'Check your email for the reset link',
+          'Click the link and set a new strong password',
+          'If your email was also changed, proceed to step 2',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 2,
+        title: 'Contact X Support if email is changed',
+        description: 'If the hacker changed your email, you need direct support.',
+        instructions: [
+          'Go to help.twitter.com/forms/hacked',
+          'Fill in the "I can\'t access the email or phone associated with my account" form',
+          'Provide your original username, registration email, and location',
+          'X may ask for identity verification',
+          'Response times are typically 1-5 business days',
+        ],
+        estimated_minutes: 15,
+      },
+      {
+        id: 3,
+        title: 'Revoke all active sessions',
+        description: 'Once you have access, sign out everywhere.',
+        instructions: [
+          'Go to Settings → Security and Account Access → Apps and Sessions → Sessions',
+          'Tap "Log out of all other sessions"',
+          'Confirm the action',
+        ],
+        estimated_minutes: 3,
+      },
+      {
+        id: 4,
+        title: 'Enable two-factor authentication',
+        description: 'Use an authenticator app — not SMS, which can be SIM-swapped.',
+        instructions: [
+          'Go to Settings → Security and Account Access → Security → Two-factor authentication',
+          'Select "Authentication app"',
+          'Link your authenticator app by scanning the QR code',
+          'Save the backup code to your AEFORYN vault',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 5,
+        title: 'Audit connected apps',
+        description: 'Remove all apps that may have been granted access by the hacker.',
+        instructions: [
+          'Go to Settings → Security and Account Access → Apps and Sessions → Connected Apps',
+          'Review every app listed',
+          'Revoke access to any app you don\'t use or recognise',
+          'Only keep apps you actively use and trust',
+        ],
+        estimated_minutes: 10,
+      },
+    ],
+  },
+  {
+    platform: 'linkedin',
+    incident_type: 'account_hacked',
+    title: 'LinkedIn Account Compromised',
+    description: 'Your LinkedIn account has been accessed by an unauthorised person.',
+    steps: [
+      {
+        id: 1,
+        title: 'Reset your LinkedIn password',
+        description: 'Use LinkedIn\'s password reset to regain immediate access.',
+        instructions: [
+          'Go to linkedin.com/uas/request-password-reset',
+          'Enter your email address',
+          'Check your inbox for the reset email',
+          'Follow the link and create a strong new password',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 2,
+        title: 'Sign out of all sessions',
+        description: 'Remove the hacker\'s active session immediately.',
+        instructions: [
+          'Once logged in, go to Settings → Sign In & Security → Where you\'re signed in',
+          'Review all active sessions',
+          'Click "Sign out" on any session you don\'t recognise',
+          'Select "Sign out of all sessions" as a precaution',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 3,
+        title: 'Check your profile for unauthorised changes',
+        description: 'Hackers often modify professional profiles to commit fraud.',
+        instructions: [
+          'Review your profile headline, summary, and experience for changes',
+          'Check your contact information for changes to email or phone',
+          'Review connections made in the past 30 days',
+          'Remove any connections you didn\'t add yourself',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 4,
+        title: 'Enable two-step verification',
+        description: 'LinkedIn supports authenticator apps for strong 2FA.',
+        instructions: [
+          'Go to Settings → Sign In & Security → Two-step verification',
+          'Click "Set up" and select "Authenticator app"',
+          'Scan the QR code with your authenticator app',
+          'Enter the code to confirm and save the backup codes',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 5,
+        title: 'Report the incident to LinkedIn',
+        description: 'Official reporting helps protect others and is documented.',
+        instructions: [
+          'Go to linkedin.com/help/linkedin/ask/TS-NCP',
+          'Select "My account was hacked or compromised"',
+          'Fill in the details of what happened',
+          'Keep your support ticket reference number',
+        ],
+        estimated_minutes: 10,
+      },
+    ],
+  },
+  {
+    platform: 'email',
+    incident_type: 'account_hacked',
+    title: 'Email Account Compromised',
+    description: 'Your email account has been accessed without your permission. This is critical because email is the key to all your other accounts.',
+    steps: [
+      {
+        id: 1,
+        title: 'Change your email password immediately',
+        description: 'This is urgent — your email is the master key to all your other accounts.',
+        instructions: [
+          'Access your email provider on a trusted device you control',
+          'For Gmail: myaccount.google.com → Security → Password',
+          'For Outlook: account.microsoft.com → Security → Change password',
+          'Create a completely new password of at least 20 characters',
+          'Do not reuse any previous passwords',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 2,
+        title: 'Sign out all active sessions',
+        description: 'Terminate any active hacker sessions immediately.',
+        instructions: [
+          'For Gmail: Click your avatar → Manage your Google Account → Security → Your devices → Manage all devices → Sign out all',
+          'For Outlook: account.microsoft.com → Security → Sign-in activity → Sign out everywhere',
+          'Confirm the action — this signs you out too, but you\'ll sign back in with your new password',
+        ],
+        estimated_minutes: 5,
+      },
+      {
+        id: 3,
+        title: 'Check for forwarding rules and filters set by the hacker',
+        description: 'Hackers often set silent email forwarding so they keep receiving your emails even after you change your password.',
+        instructions: [
+          'For Gmail: Settings → See all settings → Forwarding and POP/IMAP → check for unknown forwarding addresses',
+          'For Gmail: Settings → Filters and Blocked Addresses → delete any suspicious filters',
+          'For Outlook: Settings → Mail → Forwarding → check if forwarding is enabled',
+          'Remove any forwarding addresses you did not set',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 4,
+        title: 'Enable the strongest 2FA available',
+        description: 'Use a physical security key or authenticator app — never SMS alone.',
+        instructions: [
+          'For Gmail: myaccount.google.com → Security → 2-Step Verification → choose "Google Authenticator" or "Security Key"',
+          'For Outlook: account.microsoft.com → Security → Advanced security options → Add authentication app',
+          'Generate and save backup codes in your AEFORYN vault',
+        ],
+        estimated_minutes: 10,
+      },
+      {
+        id: 5,
+        title: 'Update passwords on accounts linked to this email',
+        description: 'Every account that uses this email for login or recovery must be secured now.',
+        instructions: [
+          'List all important accounts linked to this email (social media, banking, tools)',
+          'Change the password on each one — start with the most critical (banking, Instagram, TikTok, YouTube)',
+          'Where possible, update the recovery email to a new secure email address',
+          'Enable 2FA on every account you update',
+        ],
+        estimated_minutes: 30,
+      },
+    ],
+  },
+]
+
+export function getPlaybook(platform: string, incidentType: string): RecoveryPlaybook | undefined {
+  return RECOVERY_PLAYBOOKS.find(
+    (p) => p.platform === platform && p.incident_type === incidentType
+  )
+}
