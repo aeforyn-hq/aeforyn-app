@@ -17,7 +17,7 @@ router.get('/playbooks', requireAuth, async (_req: AuthRequest, res: Response): 
 })
 
 router.get('/playbooks/:platform/:incident', requireAuth, requirePlan(['pro', 'enterprise']), async (req: AuthRequest, res: Response): Promise<void> => {
-  const playbook = getPlaybook(req.params.platform, req.params.incident)
+  const playbook = getPlaybook(String(req.params.platform), String(req.params.incident))
   if (!playbook) { res.status(404).json({ error: 'Playbook not found' }); return }
   res.json(playbook)
 })
