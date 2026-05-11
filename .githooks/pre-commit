@@ -1,0 +1,8 @@
+#!/bin/sh
+# vercel.json is protected — this file must never be modified.
+if git diff --cached --name-only | grep -q '^vercel\.json$'; then
+  echo "ERROR: vercel.json is protected and cannot be committed."
+  echo "This file contains the SPA rewrite rule required for Vercel routing."
+  echo "If you genuinely need to change it, remove this hook temporarily and restore it after."
+  exit 1
+fi
