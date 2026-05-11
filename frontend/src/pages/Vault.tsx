@@ -89,11 +89,15 @@ export default function Vault() {
 
   const handleDownload = async (file: VaultFile) => {
     try {
+      toast.info('Preparing download…', 'Generating secure link.')
       const { data } = await api.get<{ url: string; file_name: string }>(`/api/vault/download/${file.id}`)
       const a = document.createElement('a')
       a.href = data.url
       a.download = data.file_name
+      a.rel = 'noopener noreferrer'
+      document.body.appendChild(a)
       a.click()
+      document.body.removeChild(a)
     } catch {
       toast.error('Download failed', 'Try again.')
     }

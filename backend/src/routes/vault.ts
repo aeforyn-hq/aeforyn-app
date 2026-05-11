@@ -99,7 +99,10 @@ router.delete('/files/:fileId', requireAuth, async (req: AuthRequest, res: Respo
 
   await r2.send(new DeleteObjectCommand({ Bucket: env.R2_BUCKET_NAME, Key: file.r2_key }))
   await supabase.from('vault_files').delete().eq('id', file.id)
-  await supabase.from('users').update({ storage_used_bytes: supabase.rpc('greatest', { a: 0, b: -file.file_size_bytes }) }).eq('id', req.userId!)
+  // Decrement storage, floor at 0
+  const { data: usr } = await supabase.from('users').select('storage_used_bytes').eq('id', req.userId!).single()
+  const newUsed = Math.max(0, (usr?.storage_used_bytes || 0) - file.file_size_bytes)
+  await supabase.from('users').update({ storage_used_bytes: newUsed }).eq('id', req.userId!)
 
   res.json({ message: 'File deleted' })
 })
