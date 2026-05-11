@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
 import { AuthLayout } from '@/components/auth/AuthLayout'
@@ -13,8 +13,16 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [showPw, setShowPw] = useState(false)
   const [loading, setLoading] = useState(false)
-  const { setUser, setToken } = useAuthStore()
+  const { setUser, setToken, logout } = useAuthStore()
   const navigate = useNavigate()
+
+  // Always wipe any existing session when the login page mounts —
+  // prevents one user ever seeing another user's data.
+  useEffect(() => {
+    localStorage.removeItem('aeforyn_token')
+    localStorage.removeItem('aeforyn-auth')
+    logout()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
