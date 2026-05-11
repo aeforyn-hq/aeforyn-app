@@ -13,6 +13,9 @@ import aiRoutes from './routes/ai.js'
 import billingRoutes from './routes/billing.js'
 import userRoutes from './routes/user.js'
 import monitoringRoutes from './routes/monitoring.js'
+import impersonationRoutes from './routes/impersonation.js'
+import accessDelegationRoutes from './routes/accessDelegation.js'
+import { startExpiryWorker } from './services/delegationExpiry.js'
 
 const app = express()
 
@@ -42,11 +45,14 @@ app.use('/api/ai', aiRoutes)
 app.use('/api/billing', billingRoutes)
 app.use('/api/user', userRoutes)
 app.use('/api/monitoring', monitoringRoutes)
+app.use('/api/impersonation', impersonationRoutes)
+app.use('/api/access', accessDelegationRoutes)
 
 app.get('/health', (_req, res) => res.json({ status: 'ok', service: 'aeforyn-api' }))
 
 app.listen(env.PORT, () => {
   console.log(`AEFORYN API running on port ${env.PORT}`)
+  startExpiryWorker()
 })
 
 export default app
