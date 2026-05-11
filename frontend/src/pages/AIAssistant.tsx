@@ -20,6 +20,7 @@ const SUGGESTED_PROMPTS = [
   'How do I set up 2FA on TikTok?',
   'Someone is impersonating me online',
   'Is this brand deal email a scam?',
+  'How do I change my password on Instagram?',
 ]
 
 export default function AIAssistant() {

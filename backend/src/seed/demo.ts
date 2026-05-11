@@ -197,6 +197,129 @@ Finally, report the incident to Instagram through their Help Center and notify y
   console.log(`Inserted ${messages.length} AI conversation messages (user + assistant)`)
 }
 
+async function seedImpersonation(userId: string): Promise<void> {
+  console.log('\n--- Step 6: Impersonation Handles & Alerts ---')
+
+  // Mark onboarding complete
+  await supabase.from('users').update({ has_completed_impersonation_onboarding: true }).eq('id', userId)
+
+  const { count: handleCount } = await supabase
+    .from('impersonation_handles')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+
+  if ((handleCount ?? 0) < 3) {
+    const handles = [
+      { user_id: userId, platform: 'instagram', handle: '@aeforyn' },
+      { user_id: userId, platform: 'tiktok', handle: '@aeforyn' },
+      { user_id: userId, platform: 'youtube', handle: '@aeforyn' },
+    ]
+    const { error } = await supabase.from('impersonation_handles').upsert(handles, { onConflict: 'user_id,platform' })
+    if (error) throw new Error(`Failed to seed handles: ${error.message}`)
+    console.log('Seeded 3 impersonation handles')
+  } else {
+    console.log(`Skipping handles — already have ${handleCount}`)
+  }
+
+  const { count: alertCount } = await supabase
+    .from('impersonation_alerts')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', userId)
+
+  if ((alertCount ?? 0) < 2) {
+    const alerts = [
+      {
+        user_id: userId,
+        platform: 'tiktok',
+        fake_handle: '@aeforyn.official',
+        match_type: 'handle_match',
+        risk_level: 'high',
+        status: 'active',
+        follower_count: 1200,
+        ai_analysis: 'This account closely mimics your handle with an appended .official suffix — a common impersonation tactic. The follower count indicates active engagement.',
+        detected_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        user_id: userId,
+        platform: 'instagram',
+        fake_handle: '@aeforyn_creator',
+        match_type: 'bio_match',
+        risk_level: 'medium',
+        status: 'active',
+        follower_count: 340,
+        ai_analysis: 'Bio text is nearly identical to your registered profile. This poses a moderate risk to brand deals and audience trust.',
+        detected_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      },
+    ]
+    const { data: insertedAlerts, error } = await supabase.from('impersonation_alerts').insert(alerts).select('id')
+    if (error) throw new Error(`Failed to seed alerts: ${error.message}`)
+
+    if (insertedAlerts?.length) {
+      const timeline = [
+        { alert_id: insertedAlerts[0].id, event: 'detected', description: 'Account first detected by scan', happened_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString() },
+        { alert_id: insertedAlerts[0].id, event: 'ai_analysed', description: 'AI risk analysis completed: high risk', happened_at: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000 + 60000).toISOString() },
+        { alert_id: insertedAlerts[1].id, event: 'detected', description: 'Account first detected by scan', happened_at: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString() },
+      ]
+      await supabase.from('impersonation_timeline').insert(timeline)
+    }
+    console.log('Seeded 2 impersonation alerts with timeline events')
+  } else {
+    console.log(`Skipping alerts — already have ${alertCount}`)
+  }
+}
+
+async function seedDelegations(userId: string): Promise<void> {
+  console.log('\n--- Step 7: Access Delegations ---')
+
+  const { count } = await supabase
+    .from('access_delegations')
+    .select('*', { count: 'exact', head: true })
+    .eq('owner_id', userId)
+
+  if ((count ?? 0) >= 2) {
+    console.log(`Skipping delegations — already have ${count}`)
+    return
+  }
+
+  const { data: delegations, error } = await supabase.from('access_delegations').insert([
+    {
+      owner_id: userId,
+      delegate_name: 'Sarah (VA)',
+      delegate_email: 'sarah@example.com',
+      platforms: ['Instagram', 'TikTok'],
+      vault_item_ids: [],
+      expires_at: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+      status: 'active',
+      password_changed_after: false,
+      access_token: 'demo-token-sarah-' + userId.slice(0, 8),
+    },
+    {
+      owner_id: userId,
+      delegate_name: 'James (Editor)',
+      delegate_email: 'james@example.com',
+      platforms: ['YouTube'],
+      vault_item_ids: [],
+      expires_at: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      status: 'expired',
+      password_changed_after: false,
+      access_token: 'demo-token-james-' + userId.slice(0, 8),
+    },
+  ]).select('id')
+
+  if (error) throw new Error(`Failed to seed delegations: ${error.message}`)
+
+  if (delegations?.length) {
+    const activityLog = [
+      { delegation_id: delegations[0].id, action: 'link_opened', actor: 'Sarah (VA)', metadata: { ip: '102.89.23.1' } },
+      { delegation_id: delegations[0].id, action: 'password_revealed', actor: 'Sarah (VA)', metadata: { platform: 'Instagram' } },
+      { delegation_id: delegations[1].id, action: 'link_opened', actor: 'James (Editor)', metadata: { ip: '197.211.58.4' } },
+    ]
+    await supabase.from('delegation_activity_log').insert(activityLog)
+  }
+
+  console.log('Seeded 2 delegations (1 active, 1 expired) + 3 activity log entries')
+}
+
 async function main(): Promise<void> {
   console.log('=== AEFORYN Demo Account Seed ===')
   console.log(`Target: ${DEMO_EMAIL}`)
@@ -207,6 +330,8 @@ async function main(): Promise<void> {
     await seedPlatformMonitors(userId)
     await seedThreats(userId)
     await seedAiConversations(userId)
+    await seedImpersonation(userId)
+    await seedDelegations(userId)
 
     console.log('\n=== Seed complete ===')
     process.exit(0)

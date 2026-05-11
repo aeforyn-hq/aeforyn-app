@@ -20,6 +20,9 @@ import Settings from '@/pages/Settings'
 import Billing from '@/pages/Billing'
 import Privacy from '@/pages/Privacy'
 import Terms from '@/pages/Terms'
+import Impersonation from '@/pages/Impersonation'
+import SharedAccess from '@/pages/SharedAccess'
+import DelegateAccess from '@/pages/DelegateAccess'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
@@ -44,6 +47,8 @@ export default function App() {
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
 
+        <Route path="/delegate-access" element={<DelegateAccess />} />
+
         <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<Dashboard />} />
@@ -55,6 +60,8 @@ export default function App() {
           <Route path="/ai" element={<AIAssistant />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/billing" element={<Billing />} />
+          <Route path="/impersonation" element={<Impersonation />} />
+          <Route path="/shared-access" element={<SharedAccess />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/dashboard" replace />} />

@@ -101,7 +101,7 @@ export const AeforynLogo: React.FC<AeforynLogoProps> = ({
                 marginTop: '3px',
               }}
             >
-              YOUR ACCOUNT. YOUR INCOME.
+              YOUR ACCOUNT. YOUR INCOME. PROTECTED.
             </span>
           )}
         </div>

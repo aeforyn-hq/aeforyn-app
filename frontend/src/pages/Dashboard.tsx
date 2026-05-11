@@ -1,7 +1,7 @@
 // Demo data for when API is not connected
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { Shield, AlertTriangle, Activity, HardDrive, ArrowRight, Clock, ScanLine, LifeBuoy, Bot } from 'lucide-react'
+import { Shield, AlertTriangle, Activity, HardDrive, ArrowRight, Clock, ScanLine, LifeBuoy, Bot, UserX, Users } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { Card } from '@/components/ui/Card'
 import { StatusDot } from '@/components/ui/StatusDot'
@@ -10,6 +10,9 @@ import { SeverityBadge } from '@/components/ui/Badge'
 import { api } from '@/lib/api'
 import { formatBytes, timeAgo, getScoreColor, PLATFORM_LABELS } from '@/lib/utils'
 import type { DashboardData } from '@/types'
+
+const DEMO_IMPERSONATION = { active: 2, recent: '@aeforyn.official on TikTok' }
+const DEMO_DELEGATION = { active: 1, delegate: 'Sarah (VA)', expiresAt: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString() }
 
 const DEMO_DATA: DashboardData = {
   security_score: 78,
@@ -75,8 +78,28 @@ export default function Dashboard() {
     placeholderData: DEMO_DATA,
   })
 
+  const { data: impersonationAlerts } = useQuery({
+    queryKey: ['impersonation-alerts-count'],
+    queryFn: async () => {
+      const { data } = await api.get<Array<{ status: string }>>('/api/impersonation/alerts')
+      return data
+    },
+    placeholderData: [{ status: 'active' }, { status: 'active' }],
+  })
+
+  const { data: delegations } = useQuery({
+    queryKey: ['delegations-dashboard'],
+    queryFn: async () => {
+      const { data } = await api.get<Array<{ status: string; delegate_name: string; expires_at: string }>>('/api/access/delegations')
+      return data
+    },
+    placeholderData: [{ status: 'active', delegate_name: DEMO_DELEGATION.delegate, expires_at: DEMO_DELEGATION.expiresAt }],
+  })
+
   const d = dashboard || DEMO_DATA
   const storagePercent = Math.round((d.storage_used / d.storage_total) * 100)
+  const activeAlertCount = (impersonationAlerts || []).filter((a) => a.status === 'active' || a.status === 'monitoring').length
+  const activeDelegations = (delegations || []).filter((d) => d.status === 'active')
 
   const fileIconColor: Record<string, string> = {
     video: '#2DD4BF', image: '#C9A84C', document: '#86EFAC', credential: '#F59E0B', other: '#9CA3AF', general: '#9CA3AF',
@@ -85,7 +108,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-8">
       {/* Stat cards row — all cards are clickable */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-5">
         <Link to="/threats" className="block">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0 }} className="card cursor-pointer">
             <div className="flex items-center justify-between mb-4">
@@ -158,7 +181,54 @@ export default function Dashboard() {
             </div>
           </motion.div>
         </Link>
+
+        {/* 5th stat: Impersonation Alerts */}
+        <Link to="/impersonation" className="block">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }}
+            className="card cursor-pointer"
+            style={activeAlertCount > 0 ? { boxShadow: '0 0 16px rgba(255,100,50,0.4)', borderColor: 'rgba(239,68,68,0.3)' } : {}}
+          >
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-xs font-semibold uppercase tracking-widest text-text-secondary" style={{ letterSpacing: '1.5px' }}>Impersonation</span>
+              <UserX className={`w-4 h-4 ${activeAlertCount > 0 ? 'text-threat' : 'text-text-secondary'}`} />
+            </div>
+            <p style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '48px', color: activeAlertCount > 0 ? '#EF4444' : '#86EFAC', lineHeight: 1 }}>
+              {activeAlertCount}
+            </p>
+            <p className="text-xs mt-3" style={{ color: activeAlertCount > 0 ? '#EF4444' : '#86EFAC' }}>
+              {activeAlertCount > 0 ? 'Active alerts' : 'No alerts'}
+            </p>
+            {activeAlertCount > 0 && (
+              <p className="text-xs text-text-secondary mt-1 truncate">{DEMO_IMPERSONATION.recent}</p>
+            )}
+          </motion.div>
+        </Link>
       </div>
+
+      {/* Shared Access widget */}
+      {activeDelegations.length > 0 && (
+        <Link to="/shared-access" className="block">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+            className="card cursor-pointer flex items-center gap-4"
+            style={{ borderColor: 'rgba(45,212,191,0.2)', background: 'rgba(45,212,191,0.04)' }}
+          >
+            <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(45,212,191,0.1)', border: '1px solid rgba(45,212,191,0.2)' }}>
+              <Users className="w-5 h-5 text-teal" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-text-primary">
+                {activeDelegations[0].delegate_name} has active access
+              </p>
+              <p className="text-xs text-text-secondary mt-0.5">
+                Expires {timeAgo(activeDelegations[0].expires_at)} — click to manage
+              </p>
+            </div>
+            <ArrowRight className="w-4 h-4 text-teal flex-shrink-0" />
+          </motion.div>
+        </Link>
+      )}
 
       {/* Main content row */}
       <div className="grid grid-cols-1 xl:grid-cols-5 gap-5">
