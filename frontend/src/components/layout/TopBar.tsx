@@ -7,6 +7,8 @@ import { api } from '@/lib/api'
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
   '/threats': 'Threat Center',
+  '/impersonation': 'Impersonation Detection',
+  '/shared-access': 'Shared Access',
   '/monitoring': 'Platform Monitoring',
   '/vault': 'Content Vault',
   '/scanner': 'Phishing Scanner',
@@ -60,7 +62,7 @@ export function TopBar() {
       style={{ background: '#071E1C', borderColor: 'rgba(45,212,191,0.08)' }}
     >
       <div>
-        <h1 style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '20px', color: '#F0FDF4', letterSpacing: '-0.5px' }}>
+        <h1 style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '20px', color: '#F0FDF4', letterSpacing: '-0.5px', textShadow: '0 0 20px rgba(245,158,11,0.1)' }}>
           {title}
         </h1>
       </div>

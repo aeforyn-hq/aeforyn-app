@@ -291,21 +291,32 @@ body::after {
     letter-spacing: -1px;
     line-height: 1.1;
     color: #F0FDF4;
+    text-shadow: 0 0 30px rgba(245,158,11,0.12), 0 0 60px rgba(201,168,76,0.06);
   }
 
   .heading-section {
     font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 28px;
     letter-spacing: -0.5px;
     color: #F0FDF4;
+    text-shadow: 0 0 20px rgba(245,158,11,0.1);
   }
 
   .heading-card {
     font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 20px;
     color: #F0FDF4;
+    text-shadow: 0 0 14px rgba(245,158,11,0.08);
+  }
+
+  .heading-sub {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: #F0FDF4;
+    letter-spacing: 0.2px;
   }
 
   /* Global hover glow — applies to all interactive elements */
