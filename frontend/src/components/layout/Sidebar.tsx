@@ -98,82 +98,72 @@ export function Sidebar() {
                     'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group relative',
                     premium
                       ? isActive
-                        ? 'bg-teal/5'
-                        : 'hover:bg-teal/5'
+                        ? ''
+                        : ''
                       : isActive
                         ? 'text-gold bg-gold-subtle border-l-2 border-gold pl-[10px]'
                         : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
                   )
                 }
-                style={premium ? { border: '1px solid rgba(45,212,191,0.15)', borderRadius: '12px', marginBottom: '2px' } : {}}
+                style={({ isActive }) => premium ? {
+                  border: '1px solid rgba(20,184,166,0.35)',
+                  borderLeft: isActive ? '3px solid #14B8A6' : '1px solid rgba(20,184,166,0.35)',
+                  borderRadius: '12px',
+                  marginBottom: '4px',
+                  background: isActive ? 'rgba(20,184,166,0.1)' : 'rgba(20,184,166,0.04)',
+                  boxShadow: isActive ? '0 0 12px rgba(20,184,166,0.15), inset 0 0 12px rgba(20,184,166,0.05)' : '0 0 8px rgba(20,184,166,0.08)',
+                  paddingLeft: isActive ? '10px' : undefined,
+                } : {}}
               >
                 {({ isActive }) => (
                   <>
                     {premium ? (
-                      /* Pulsating hex icon for premium items */
-                      <div className="relative w-5 h-5 flex-shrink-0">
+                      /* Pulsating hex icon — gold for premium */
+                      <div className="relative w-6 h-6 flex-shrink-0">
                         <motion.div
                           className="absolute inset-0"
-                          animate={{ opacity: [0.4, 0.85, 0.4] }}
-                          transition={{ duration: 2.2, repeat: Infinity, ease: 'easeInOut' }}
-                          style={{ filter: 'drop-shadow(0 0 4px #2DD4BF)' }}
+                          animate={{ opacity: [0.5, 1, 0.5], scale: [0.9, 1.15, 0.9] }}
+                          transition={{ duration: 1.8, repeat: Infinity, ease: 'easeInOut' }}
+                          style={{ filter: 'drop-shadow(0 0 6px #F59E0B)' }}
                         >
-                          <svg viewBox="0 0 20 20" fill="none" width="20" height="20">
+                          <svg viewBox="0 0 20 20" fill="none" width="24" height="24">
                             <polygon
                               points="10,2 17,5.5 17,14.5 10,18 3,14.5 3,5.5"
-                              fill={isActive ? 'rgba(45,212,191,0.2)' : 'rgba(45,212,191,0.08)'}
-                              stroke="#2DD4BF"
-                              strokeWidth="1"
+                              fill={isActive ? 'rgba(245,158,11,0.25)' : 'rgba(245,158,11,0.12)'}
+                              stroke="#F59E0B"
+                              strokeWidth="1.2"
                             />
                           </svg>
                         </motion.div>
-                        <Icon className="absolute inset-0 m-auto w-3 h-3" style={{ color: isActive ? '#2DD4BF' : 'rgba(45,212,191,0.7)' }} />
+                        <Icon className="absolute inset-0 m-auto w-3 h-3" style={{ color: isActive ? '#F59E0B' : 'rgba(245,158,11,0.85)' }} />
                       </div>
                     ) : (
                       <Icon className={cn('w-4 h-4 flex-shrink-0 transition-colors', isActive ? 'text-gold' : 'text-text-secondary group-hover:text-text-primary')} />
                     )}
 
-                    {/* Label — teal metallic for premium */}
+                    {/* Label — bright teal metallic for premium */}
                     <span
-                      className="flex-1 relative"
+                      className="flex-1"
                       style={premium ? {
-                        background: 'linear-gradient(180deg, #7EEADB 0%, #2DD4BF 50%, #1AA090 100%)',
+                        background: 'linear-gradient(180deg, #5EEAD4 0%, #14B8A6 50%, #0D9488 100%)',
                         WebkitBackgroundClip: 'text',
                         backgroundClip: 'text',
                         WebkitTextFillColor: 'transparent',
-                        textShadow: 'none',
-                        fontWeight: 600,
-                        letterSpacing: '0.2px',
+                        fontWeight: 700,
+                        letterSpacing: '0.3px',
+                        filter: 'drop-shadow(0 0 4px rgba(20,184,166,0.5))',
                       } : {}}
                     >
-                      {/* 3D shadow layer for premium */}
-                      {premium && (
-                        <span
-                          aria-hidden
-                          className="absolute"
-                          style={{
-                            top: '1.5px',
-                            left: '1px',
-                            background: 'linear-gradient(180deg, #0A5A52, #074A42)',
-                            WebkitBackgroundClip: 'text',
-                            backgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            userSelect: 'none',
-                          }}
-                        >
-                          {label}
-                        </span>
-                      )}
                       {label}
                     </span>
 
-                    {/* Gold underline for premium */}
+                    {/* Gold glowing bottom border for premium */}
                     {premium && (
                       <motion.div
-                        className="absolute bottom-0 left-3 right-3 h-px"
-                        style={{ background: 'linear-gradient(90deg, transparent, #F59E0B, transparent)' }}
-                        animate={{ opacity: [0.4, 0.9, 0.4] }}
-                        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                        className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full"
+                        style={{ background: 'linear-gradient(90deg, transparent, #F59E0B 30%, #F59E0B 70%, transparent)' }}
+                        animate={{ opacity: [0.6, 1, 0.6], scaleX: [0.85, 1, 0.85] }}
+                        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
                       />
                     )}
 
@@ -185,7 +175,7 @@ export function Sidebar() {
                           setProTooltip(proTooltip === to ? null : to)
                         }}
                         className="flex-shrink-0 px-1.5 py-0.5 rounded text-xs font-bold"
-                        style={{ background: 'rgba(201,168,76,0.15)', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.3)', fontSize: '10px', letterSpacing: '0.5px' }}
+                        style={{ background: 'rgba(245,158,11,0.15)', color: '#F59E0B', border: '1px solid #F59E0B', boxShadow: '0 0 6px rgba(245,158,11,0.4)', fontSize: '10px', letterSpacing: '0.5px' }}
                       >
                         PRO
                       </button>
