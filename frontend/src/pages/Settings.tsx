@@ -222,13 +222,19 @@ function SecurityTab() {
 
   const handleChangePw = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (newPw !== confirmPw)  { toast.error('Passwords do not match'); return }
-    if (newPw.length < 8)     { toast.error('Password must be at least 8 characters'); return }
+    if (newPw !== confirmPw) { toast.error('Passwords do not match'); return }
+    if (newPw.length < 8)    { toast.error('Password must be at least 8 characters'); return }
     setChanging(true)
-    await new Promise((r) => setTimeout(r, 1000))
-    toast.success('Password updated successfully')
-    setCurrentPw(''); setNewPw(''); setConfirmPw('')
-    setChanging(false)
+    try {
+      await api.patch('/api/user/password', { current_password: currentPw, new_password: newPw })
+      toast.success('Password updated successfully')
+      setCurrentPw(''); setNewPw(''); setConfirmPw('')
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { error?: string } } })?.response?.data?.error || 'Failed to update password'
+      toast.error('Password change failed', message)
+    } finally {
+      setChanging(false)
+    }
   }
 
   return (
