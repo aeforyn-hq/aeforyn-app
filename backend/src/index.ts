@@ -20,8 +20,19 @@ import { startExpiryWorker } from './services/delegationExpiry.js'
 const app = express()
 app.set('trust proxy', 1)
 app.use(helmet())
+
+const allowedOrigins = env.FRONTEND_URL
+  .split(',')
+  .map((o) => o.trim())
+  .filter(Boolean)
+if (!allowedOrigins.includes('http://localhost:5173')) allowedOrigins.push('http://localhost:5173')
+if (!allowedOrigins.includes('http://localhost:3000')) allowedOrigins.push('http://localhost:3000')
+
 app.use(cors({
-  origin: env.FRONTEND_URL,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) return callback(null, true)
+    callback(new Error(`CORS: origin ${origin} not allowed`))
+  },
   credentials: true,
 }))
 
