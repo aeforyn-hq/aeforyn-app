@@ -41,7 +41,7 @@ const PLANS: Plan[] = [
     usdPrice: 29,
     zarPrice: 529,
     description: 'Solo creators and freelancers levelling up',
-    highlights: ['10 platforms monitored', 'Advanced threat alerts', '50 phishing scans/month', '25 GB vault storage', 'Recovery playbooks', 'Impersonation detection'],
+    highlights: ['10 platforms monitored', 'Advanced threat alerts', '50 phishing scans/month', '25 GB vault storage', 'Recovery playbooks', 'Impersonation monitoring + email alerts'],
     cta: 'Upgrade to Standard',
   },
   {
@@ -50,7 +50,7 @@ const PLANS: Plan[] = [
     usdPrice: 49,
     zarPrice: 899,
     description: 'Full-time creators who depend on their brand',
-    highlights: ['Unlimited platforms', 'Real-time threat alerts', 'Unlimited phishing scans', '100 GB vault storage', 'AI assistant + resolution guide', 'Recovery playbooks', 'Priority support', 'Impersonation detection'],
+    highlights: ['Unlimited platforms', 'Real-time threat alerts', 'Unlimited phishing scans', '100 GB vault storage', 'AI assistant + resolution guide', 'Recovery playbooks', 'Priority support', 'Full impersonation detection + takedown tools'],
     badge: 'Most Popular',
     mostPopular: true,
     isGold: true,
@@ -76,7 +76,7 @@ const FEATURE_TABLE: FeatureRow[] = [
   { label: 'AI resolution guide', free: false, standard: false, pro: true },
   { label: 'Recovery playbooks', free: false, standard: true, pro: true },
   { label: 'Priority support', free: false, standard: false, pro: true },
-  { label: 'Account impersonation detection', free: false, standard: true, pro: true },
+  { label: 'Account impersonation detection', free: false, standard: 'Monitor only', pro: 'Full detection' },
 ]
 
 const DIFFERENTIATORS = [
@@ -430,6 +430,55 @@ export default function Billing() {
         </AnimatePresence>
       </motion.div>
 
+      {/* Impersonation detection callout — prominent, above feature table */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.32 }}
+        className="rounded-2xl p-6"
+        style={{
+          background: 'rgba(245,158,11,0.05)',
+          border: '2px solid #F59E0B',
+          boxShadow: '0 0 24px rgba(245,158,11,0.18), inset 0 0 20px rgba(245,158,11,0.04)',
+          animation: 'glow-pulse 3s ease-in-out infinite',
+        }}
+      >
+        <div className="flex items-start gap-4">
+          <div
+            className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+            style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.35)' }}
+          >
+            <Shield className="w-5 h-5" style={{ color: '#F59E0B' }} />
+          </div>
+          <div className="flex-1">
+            <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '17px', color: '#F0FDF4', marginBottom: '8px' }}>
+              Account Impersonation Detection
+            </h3>
+            <p className="text-sm text-text-secondary leading-relaxed mb-4">
+              AEFORYN monitors for copycat accounts using your handle, avatar, and bio across Instagram, TikTok, YouTube, X, and Facebook.
+            </p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="rounded-xl p-3" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                <p className="text-xs font-semibold mb-1" style={{ color: '#F59E0B' }}>Standard — Monitoring Only</p>
+                <ul className="text-xs text-text-secondary space-y-0.5">
+                  <li>• Cross-platform handle monitoring</li>
+                  <li>• Email notifications on detection</li>
+                </ul>
+              </div>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.25)' }}>
+                <p className="text-xs font-semibold mb-1" style={{ color: '#C9A84C' }}>Pro — Full Detection</p>
+                <ul className="text-xs text-text-secondary space-y-0.5">
+                  <li>• AI risk analysis + takedown guide</li>
+                  <li>• Fake account tracker</li>
+                  <li>• Brand deal phishing scanner</li>
+                  <li>• Real-time alert overlay + monthly report</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
       {/* Full feature comparison table */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -490,40 +539,6 @@ export default function Billing() {
               ))}
             </tbody>
           </table>
-        </div>
-      </motion.div>
-
-      {/* Impersonation detection callout */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="rounded-2xl p-6"
-        style={{ background: 'rgba(45,212,191,0.04)', border: '1.5px solid rgba(45,212,191,0.35)' }}
-      >
-        <div className="flex items-start gap-4">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-            style={{ background: 'rgba(45,212,191,0.1)', border: '1px solid rgba(45,212,191,0.2)' }}
-          >
-            <Shield className="w-5 h-5" style={{ color: '#2DD4BF' }} />
-          </div>
-          <div>
-            <h3
-              style={{
-                fontFamily: 'Space Grotesk, sans-serif',
-                fontWeight: 700,
-                fontSize: '17px',
-                color: '#F0FDF4',
-                marginBottom: '8px',
-              }}
-            >
-              Account impersonation detection — included in Standard &amp; Pro
-            </h3>
-            <p className="text-sm text-text-secondary leading-relaxed">
-              AEFORYN monitors for copycat accounts using your handle, avatar, and bio across Instagram, TikTok, YouTube, X, and Facebook. When we detect a potential impersonator, we alert you instantly and provide a one-click reporting workflow.
-            </p>
-          </div>
         </div>
       </motion.div>
 
