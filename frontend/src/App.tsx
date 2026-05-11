@@ -27,7 +27,7 @@ import DelegateAccess from '@/pages/DelegateAccess'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuthStore()
-  if (!isAuthenticated) return <Navigate to="/login" replace />
+  if (!isAuthenticated) return <Navigate to="/signin" replace />
   return <>{children}</>
 }
 
@@ -39,7 +39,7 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
 
 function CatchAll() {
   const { isAuthenticated } = useAuthStore()
-  return <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />
+  return <Navigate to={isAuthenticated ? '/dashboard' : '/signin'} replace />
 }
 
 export default function App() {
@@ -53,7 +53,8 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/signin" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/login" element={<Navigate to="/signin" replace />} />
         <Route path="/signup" element={<PublicRoute><Signup /></PublicRoute>} />
         <Route path="/forgot-password" element={<PublicRoute><ForgotPassword /></PublicRoute>} />
         <Route path="/verify-email" element={<VerifyEmail />} />
