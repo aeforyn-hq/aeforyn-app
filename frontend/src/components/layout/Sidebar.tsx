@@ -8,6 +8,8 @@ import {
 import { useAuthStore } from '@/store/authStore'
 import { AeforynLogo } from '@/components/ui/AeforynLogo'
 import { PlanBadge } from '@/components/ui/Badge'
+import { AvatarDisplay } from '@/components/ui/AvatarSVG'
+import type { AvatarId } from '@/components/ui/AvatarSVG'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
@@ -45,6 +47,7 @@ export function Sidebar() {
   }
 
   const initials = user?.email?.slice(0, 2).toUpperCase() || 'AE'
+  const avatarId = ((user as { avatar?: string })?.avatar as AvatarId) || null
 
   return (
     <aside
@@ -62,12 +65,16 @@ export function Sidebar() {
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
           style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.12)' }}
         >
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-            style={{ background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#071E1C' }}
-          >
-            {initials}
-          </div>
+          {avatarId ? (
+            <AvatarDisplay id={avatarId} size={32} />
+          ) : (
+            <div
+              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+              style={{ background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#071E1C' }}
+            >
+              {initials}
+            </div>
+          )}
           <div className="min-w-0 flex-1">
             <p className="text-xs font-medium text-text-primary truncate">
               {user?.creator_handle || user?.email?.split('@')[0] || 'Creator'}

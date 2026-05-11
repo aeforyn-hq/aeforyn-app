@@ -1,8 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { Bell, Search, User, Settings, CreditCard, LogOut, HelpCircle, RefreshCw, ChevronDown, Shield, AlertTriangle, Info } from 'lucide-react'
+import { Bell, User, Settings, CreditCard, LogOut, HelpCircle, RefreshCw, ChevronDown, Shield, AlertTriangle, Info } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { api } from '@/lib/api'
+import { AvatarDisplay } from '@/components/ui/AvatarSVG'
+import type { AvatarId } from '@/components/ui/AvatarSVG'
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -31,6 +33,7 @@ export function TopBar() {
   const navigate = useNavigate()
   const { user, logout } = useAuthStore()
   const title = PAGE_TITLES[pathname] || 'AEFORYN'
+  const avatarId = ((user as { avatar?: string })?.avatar as AvatarId) || null
   const initials = user?.email?.slice(0, 2).toUpperCase() || 'AE'
 
   const [notifOpen, setNotifOpen] = useState(false)
@@ -133,12 +136,16 @@ export function TopBar() {
             onClick={() => { setAvatarOpen(o => !o); setNotifOpen(false) }}
             className="flex items-center gap-2 rounded-xl px-2 py-1 hover:bg-white/5 transition-all"
           >
-            <div
-              className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold"
-              style={{ background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#071E1C' }}
-            >
-              {initials}
-            </div>
+            {avatarId ? (
+              <AvatarDisplay id={avatarId} size={36} />
+            ) : (
+              <div
+                className="w-9 h-9 rounded-full flex items-center justify-center text-xs font-bold"
+                style={{ background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#071E1C' }}
+              >
+                {initials}
+              </div>
+            )}
             <ChevronDown className="w-3.5 h-3.5 text-text-secondary" />
           </button>
 
