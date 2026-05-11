@@ -2,13 +2,15 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Shield, X, CheckCircle, Clock, MapPin, AlertTriangle } from 'lucide-react'
+import { Shield, X, CheckCircle, Clock, MapPin, AlertTriangle, Bot, Lock, Loader2, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { StatusDot } from '@/components/ui/StatusDot'
 import { SeverityBadge } from '@/components/ui/Badge'
 import { api } from '@/lib/api'
-import { timeAgo, PLATFORM_LABELS } from '@/lib/utils'
+import { timeAgo, PLATFORM_LABELS, hasFeature } from '@/lib/utils'
 import { toast } from '@/store/toastStore'
+import { useAuthStore } from '@/store/authStore'
+import { Link } from 'react-router-dom'
 import type { Threat } from '@/types'
 
 const DEMO_THREATS: Threat[] = [
@@ -25,9 +27,68 @@ const DEMO_THREATS: Threat[] = [
 const TABS = ['all', 'critical', 'high', 'medium', 'low', 'resolved'] as const
 type Tab = typeof TABS[number]
 
+const AI_RESOLUTION_STEPS: Record<string, string[]> = {
+  login_attempt: [
+    'Go to your account Security Settings immediately',
+    'Review all active sessions and revoke any you don\'t recognise',
+    'Change your password to a strong, unique one (16+ chars)',
+    'Enable or verify two-factor authentication (use an authenticator app, not SMS)',
+    'Check your recovery email and phone number — attackers often change these',
+    'Review account activity logs for any unauthorised actions',
+    'Alert your audience if your account was used to post anything suspicious',
+  ],
+  phishing: [
+    'Do NOT click any links or download attachments from the suspicious message',
+    'Report the message as phishing to the platform',
+    'Block and report the sender',
+    'Check if you accidentally clicked anything — if so, run a security scan',
+    'If you entered credentials, change your password immediately on that platform',
+    'Enable 2FA on affected accounts',
+    'Forward phishing emails to reportphishing@apwg.org for reporting',
+  ],
+  account_takeover: [
+    'Use the platform\'s official account recovery process (do not use links in emails)',
+    'Verify your identity using backup codes, phone, or trusted devices',
+    'Once recovered, immediately change your password',
+    'Revoke all active sessions across all devices',
+    'Re-enable 2FA with a new authenticator app enrollment',
+    'Check for any posts, DMs, or changes made by the attacker',
+    'Notify followers if the attacker used your account to scam them',
+  ],
+  suspicious_access: [
+    'Review the device and location of the suspicious login in your security settings',
+    'If you don\'t recognise the session, revoke it immediately',
+    'Change your password as a precaution',
+    'Check if your email used for that account has been compromised',
+    'Verify your recovery methods haven\'t been tampered with',
+    'Enable login notifications to be alerted of future logins',
+  ],
+  data_breach: [
+    'Change the password for the breached service immediately',
+    'If you reused that password anywhere else, change it on all those accounts too',
+    'Enable 2FA on any accounts where the breached password was used',
+    'Check haveibeenpwned.com for a full breach history for your email',
+    'Monitor your bank statements if financial data may have been exposed',
+    'Consider using a password manager to generate unique passwords',
+  ],
+  impersonation: [
+    'Report the impersonating account to the platform using the official report tool',
+    'Screenshot and document the fake account before it is removed',
+    'Post a notice to your genuine audience warning them about the fake account',
+    'Include the fake account\'s username in your bio or pinned post temporarily',
+    'Apply for a verification badge on platforms where you qualify',
+    'Monitor for additional impersonation accounts using AEFORYN\'s scan',
+  ],
+}
+
 export default function Threats() {
   const [activeTab, setActiveTab] = useState<Tab>('all')
   const [selectedThreat, setSelectedThreat] = useState<Threat | null>(null)
+  const [aiPanelOpen, setAiPanelOpen] = useState(false)
+  const [aiLoading, setAiLoading] = useState(false)
+  const [aiSteps, setAiSteps] = useState<string[]>([])
+  const { user } = useAuthStore()
+  const isProUser = hasFeature(user?.plan_tier || 'free', 'ai_assistant')
   const queryClient = useQueryClient()
 
   const { data: threats = DEMO_THREATS } = useQuery({
@@ -38,6 +99,17 @@ export default function Threats() {
     },
     placeholderData: DEMO_THREATS,
   })
+
+  async function openAIResolution(threat: Threat) {
+    if (!isProUser) { setAiPanelOpen(true); return }
+    setAiPanelOpen(true)
+    setAiLoading(true)
+    setAiSteps([])
+    await new Promise(r => setTimeout(r, 800))
+    const steps = AI_RESOLUTION_STEPS[threat.threat_type] || AI_RESOLUTION_STEPS.suspicious_access
+    setAiLoading(false)
+    setAiSteps(steps)
+  }
 
   const resolveMutation = useMutation({
     mutationFn: async (id: string) => {
@@ -116,7 +188,7 @@ export default function Threats() {
               transition={{ delay: i * 0.05 }}
               onClick={() => setSelectedThreat(threat)}
               className="flex items-center gap-4 p-5 rounded-2xl cursor-pointer transition-all duration-150 hover:border-gold/25"
-              style={{ background: '#0C1A0F', border: '1px solid rgba(45,212,191,0.08)' }}
+              style={{ background: '#0A2422', border: '1px solid rgba(45,212,191,0.08)' }}
             >
               <StatusDot
                 status={threat.severity === 'critical' ? 'critical' : threat.severity === 'high' ? 'threat' : threat.severity === 'medium' ? 'warning' : 'safe'}
@@ -176,7 +248,7 @@ export default function Threats() {
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
               className="fixed right-0 top-0 bottom-0 w-full max-w-md z-50 flex flex-col"
-              style={{ background: '#0C1A0F', borderLeft: '1px solid rgba(201,168,76,0.2)' }}
+              style={{ background: '#0A2422', borderLeft: '1px solid rgba(201,168,76,0.2)' }}
             >
               <div className="flex items-center justify-between p-6 border-b" style={{ borderColor: 'rgba(45,212,191,0.1)' }}>
                 <h2 className="heading-card">Threat Details</h2>
@@ -227,6 +299,58 @@ export default function Threats() {
                     </p>
                   </div>
                 )}
+
+                {/* AI Resolution Panel */}
+                <div className="rounded-xl overflow-hidden" style={{ border: '1px solid rgba(201,168,76,0.2)' }}>
+                  <button
+                    onClick={() => selectedThreat && openAIResolution(selectedThreat)}
+                    className="w-full flex items-center justify-between p-4 transition-colors hover:bg-white/3"
+                    style={{ background: 'rgba(201,168,76,0.05)' }}
+                  >
+                    <div className="flex items-center gap-2">
+                      <Bot className="w-4 h-4 text-gold" />
+                      <span style={{ color: '#C9A84C', fontSize: '13px', fontWeight: 600 }}>AI Resolution Guide</span>
+                      {!isProUser && <Lock className="w-3 h-3 text-gold" />}
+                    </div>
+                    <ChevronRight className={`w-4 h-4 text-gold transition-transform ${aiPanelOpen ? 'rotate-90' : ''}`} />
+                  </button>
+
+                  <AnimatePresence>
+                    {aiPanelOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="p-4 space-y-3" style={{ borderTop: '1px solid rgba(201,168,76,0.1)' }}>
+                          {!isProUser ? (
+                            <div className="text-center py-4">
+                              <Lock className="w-8 h-8 text-gold mx-auto mb-2" />
+                              <p className="text-sm font-medium" style={{ color: '#F0FDF4' }}>Pro feature</p>
+                              <p className="text-xs text-text-secondary mt-1 mb-3">AI-powered resolution steps are available on Pro and above.</p>
+                              <Link to="/billing" className="btn-primary text-xs px-4 py-2">Upgrade to Pro</Link>
+                            </div>
+                          ) : aiLoading ? (
+                            <div className="flex items-center gap-2 py-4 justify-center">
+                              <Loader2 className="w-4 h-4 text-gold animate-spin" />
+                              <span className="text-sm text-text-secondary">Generating resolution steps…</span>
+                            </div>
+                          ) : (
+                            <ol className="space-y-2">
+                              {aiSteps.map((step, i) => (
+                                <li key={i} className="flex gap-3 text-sm">
+                                  <span className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" style={{ background: 'rgba(201,168,76,0.2)', color: '#C9A84C' }}>{i + 1}</span>
+                                  <span style={{ color: '#86EFAC', lineHeight: 1.5 }}>{step}</span>
+                                </li>
+                              ))}
+                            </ol>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </div>
 
               {!selectedThreat.is_resolved && (

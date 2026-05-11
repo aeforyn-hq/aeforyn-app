@@ -229,7 +229,7 @@ export default function PhishingScanner() {
                     <div
                       key={scan.id}
                       className="flex items-center gap-4 p-4 rounded-xl cursor-pointer hover:bg-white/5 transition-all"
-                      style={{ background: '#0C1A0F', border: '1px solid rgba(45,212,191,0.06)' }}
+                      style={{ background: '#0A2422', border: '1px solid rgba(45,212,191,0.06)' }}
                       onClick={() => { setResult(scan); setInputText(scan.input_text) }}
                     >
                       <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: getRiskColor(scan.risk_level) }} />

@@ -15,9 +15,26 @@ const PLATFORMS = [
   { id: 'instagram', label: 'Instagram' },
   { id: 'tiktok', label: 'TikTok' },
   { id: 'youtube', label: 'YouTube' },
-  { id: 'email', label: 'Email' },
+  { id: 'email', label: 'Email / Gmail' },
   { id: 'x', label: 'X (Twitter)' },
   { id: 'linkedin', label: 'LinkedIn' },
+  { id: 'facebook', label: 'Facebook' },
+  { id: 'snapchat', label: 'Snapchat' },
+  { id: 'pinterest', label: 'Pinterest' },
+  { id: 'twitch', label: 'Twitch' },
+  { id: 'discord', label: 'Discord' },
+  { id: 'reddit', label: 'Reddit' },
+  { id: 'telegram', label: 'Telegram' },
+  { id: 'whatsapp', label: 'WhatsApp' },
+  { id: 'spotify', label: 'Spotify' },
+  { id: 'patreon', label: 'Patreon' },
+  { id: 'onlyfans', label: 'OnlyFans' },
+  { id: 'substack', label: 'Substack' },
+  { id: 'medium', label: 'Medium' },
+  { id: 'github', label: 'GitHub' },
+  { id: 'shopify', label: 'Shopify' },
+  { id: 'etsy', label: 'Etsy' },
+  { id: 'gumroad', label: 'Gumroad' },
 ]
 
 const INCIDENT_TYPES = [
@@ -34,6 +51,8 @@ interface PlaybookStep {
   description: string
   instructions: string[]
   estimated_minutes: number
+  officialLink?: string
+  officialLinkLabel?: string
 }
 
 interface Playbook {
@@ -76,6 +95,8 @@ const DEMO_PLAYBOOK: Playbook = {
         'Do NOT pay anyone claiming they can recover your account',
       ],
       estimated_minutes: 15,
+      officialLink: 'https://help.instagram.com/368191326593075',
+      officialLinkLabel: 'Instagram Help: Hacked Account',
     },
     {
       id: 3,
@@ -114,6 +135,8 @@ const DEMO_PLAYBOOK: Playbook = {
         'Save your backup codes to your AEFORYN vault',
       ],
       estimated_minutes: 10,
+      officialLink: 'https://help.instagram.com/566810106808145',
+      officialLinkLabel: 'Instagram 2FA Setup Guide',
     },
     {
       id: 6,
@@ -285,7 +308,9 @@ export default function Recovery() {
   if (activeSession) {
     const { playbook } = activeSession
     const currentStepIndex = completedSteps.length
-    const currentStep = playbook.steps[currentStepIndex]
+    const FREE_STEP_LIMIT = 3
+    const isStepLocked = !isPro && currentStepIndex >= FREE_STEP_LIMIT
+    const currentStep = isStepLocked ? null : playbook.steps[currentStepIndex]
     const allDone = completedSteps.length >= playbook.steps.length
     const progressPct = Math.round((completedSteps.length / playbook.steps.length) * 100)
 
@@ -316,9 +341,24 @@ export default function Recovery() {
           </div>
         )}
 
+        {/* Free plan step gate */}
+        {!allDone && isStepLocked && (
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="card-static text-center py-10">
+            <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)' }}>
+              <Lock className="w-6 h-6 text-gold" />
+            </div>
+            <h3 className="heading-card mb-2">Steps 4+ are Pro-only</h3>
+            <p className="text-text-secondary text-sm mb-6">
+              Free plan includes the first 3 recovery steps. Upgrade to Pro to access all steps, AI resolution guidance, and incident reports.
+            </p>
+            <Link to="/billing"><button className="btn-primary">Upgrade to Pro — $49/month</button></Link>
+          </motion.div>
+        )}
+
         {/* Current step */}
-        {!allDone && currentStep && (
-          <motion.div key={currentStep.id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="card-static">
+        {!allDone && !isStepLocked && currentStep != null && (
+          <motion.div key={(currentStep as PlaybookStep).id} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="card-static">
             <div className="flex items-center gap-4 mb-5">
               <div className="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"
                 style={{ background: 'rgba(201,168,76,0.15)', border: '2px solid rgba(201,168,76,0.4)' }}>
@@ -335,7 +375,7 @@ export default function Recovery() {
 
             <p className="text-text-secondary text-sm mb-5 leading-relaxed">{currentStep.description}</p>
 
-            <ol className="space-y-3 mb-6">
+            <ol className="space-y-3 mb-5">
               {currentStep.instructions.map((instruction, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5"
@@ -346,6 +386,19 @@ export default function Recovery() {
                 </li>
               ))}
             </ol>
+
+            {currentStep.officialLink && (
+              <a
+                href={currentStep.officialLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-xs mb-5 transition-colors hover:underline"
+                style={{ color: '#2DD4BF' }}
+              >
+                <ChevronRight className="w-3.5 h-3.5" />
+                {currentStep.officialLinkLabel || 'Official recovery page'} ↗
+              </a>
+            )}
 
             <div className="flex flex-col gap-3">
               <Button variant="primary" className="w-full" onClick={() => markStep(currentStep.id)}>
@@ -390,7 +443,7 @@ export default function Recovery() {
               style={{
                 fontFamily: 'Space Grotesk, sans-serif',
                 fontSize: '16px',
-                background: selectedPlatform === p.id ? 'rgba(201,168,76,0.1)' : '#0C1A0F',
+                background: selectedPlatform === p.id ? 'rgba(201,168,76,0.1)' : '#0A2422',
                 border: `1px solid ${selectedPlatform === p.id ? 'rgba(201,168,76,0.5)' : 'rgba(45,212,191,0.1)'}`,
                 color: selectedPlatform === p.id ? '#C9A84C' : '#F0FDF4',
               }}
@@ -415,7 +468,7 @@ export default function Recovery() {
                   onClick={() => setSelectedIncident(incident.id)}
                   className="w-full flex items-center justify-between p-4 rounded-xl text-left transition-all duration-150"
                   style={{
-                    background: selectedIncident === incident.id ? 'rgba(201,168,76,0.08)' : '#0C1A0F',
+                    background: selectedIncident === incident.id ? 'rgba(201,168,76,0.08)' : '#0A2422',
                     border: `1px solid ${selectedIncident === incident.id ? 'rgba(201,168,76,0.4)' : 'rgba(45,212,191,0.08)'}`,
                   }}
                 >
@@ -466,7 +519,7 @@ export default function Recovery() {
             <div className="mt-2 space-y-2">
               {sessions.map((session) => (
                 <div key={session.id} className="flex items-center justify-between p-4 rounded-xl"
-                  style={{ background: '#0C1A0F', border: '1px solid rgba(45,212,191,0.06)' }}>
+                  style={{ background: '#0A2422', border: '1px solid rgba(45,212,191,0.06)' }}>
                   <div>
                     <p className="text-sm font-medium text-text-primary capitalize">
                       {PLATFORM_LABELS[session.platform] || session.platform} — {session.incident_type.replace(/_/g, ' ')}

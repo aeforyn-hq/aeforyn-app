@@ -5,11 +5,11 @@ export default {
   theme: {
     extend: {
       colors: {
-        'bg-primary': '#050D0A',
-        'bg-secondary': '#081208',
-        'bg-card': '#0C1A0F',
-        'bg-card-hover': '#102015',
-        'bg-input': '#0A1710',
+        'bg-primary': '#071E1C',
+        'bg-secondary': '#051614',
+        'bg-card': '#0A2422',
+        'bg-card-hover': '#0D2E2B',
+        'bg-input': '#091F1D',
         'gold': '#C9A84C',
         'gold-light': '#E4C46A',
         'gold-dim': '#9A7A35',
