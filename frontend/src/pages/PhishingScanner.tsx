@@ -120,6 +120,15 @@ export default function PhishingScanner() {
             exit={{ opacity: 0, scale: 0.95 }}
             className="card-static text-center py-10"
           >
+            <style>{`
+              @keyframes aeforyn-spin {
+                from { transform: rotate(0deg); }
+                to   { transform: rotate(360deg); }
+              }
+              .hex-top { transform-box: fill-box; transform-origin: center; animation: aeforyn-spin 8s linear infinite; }
+              .hex-bl  { transform-box: fill-box; transform-origin: center; animation: aeforyn-spin 5s linear infinite; }
+              .hex-br  { transform-box: fill-box; transform-origin: center; animation: aeforyn-spin 3s linear infinite; }
+            `}</style>
             <div className="w-32 h-32 mx-auto mb-5 relative flex items-center justify-center">
               {/* Outer glow — radiates gold, intensifies when scanning */}
               <motion.div
@@ -154,35 +163,23 @@ export default function PhishingScanner() {
                   </linearGradient>
                 </defs>
 
-                {/* Top hex — slowest (8s) */}
-                <motion.g
-                  style={{ transformBox: 'fill-box', transformOrigin: 'center' } as React.CSSProperties}
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-                >
+                {/* Top hex — slowest (8s), center (24,14) */}
+                <g className="hex-top">
                   <polygon points="24,6 31,10 31,18 24,22 17,18 17,10" fill="url(#hgGold1)" stroke="#F59E0B" strokeWidth="0.5" />
                   <polygon points="24,8 29.5,11 29.5,17 24,20 18.5,17 18.5,11" fill="#071E1C" opacity="0.22" />
-                </motion.g>
+                </g>
 
-                {/* Bottom-left hex — medium (5.5s) */}
-                <motion.g
-                  style={{ transformBox: 'fill-box', transformOrigin: 'center' } as React.CSSProperties}
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 5.5, repeat: Infinity, ease: 'linear' }}
-                >
+                {/* Bottom-left hex — medium (5s), center (16,30) */}
+                <g className="hex-bl">
                   <polygon points="16,22 23,26 23,34 16,38 9,34 9,26" fill="url(#hgGold2)" stroke="#F59E0B" strokeWidth="0.5" />
                   <polygon points="16,24 21.5,27 21.5,33 16,36 10.5,33 10.5,27" fill="#071E1C" opacity="0.22" />
-                </motion.g>
+                </g>
 
-                {/* Bottom-right hex — fastest (3.5s) */}
-                <motion.g
-                  style={{ transformBox: 'fill-box', transformOrigin: 'center' } as React.CSSProperties}
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 3.5, repeat: Infinity, ease: 'linear' }}
-                >
+                {/* Bottom-right hex — fastest (3s), center (32,30) */}
+                <g className="hex-br">
                   <polygon points="32,22 39,26 39,34 32,38 25,34 25,26" fill="url(#hgGold3)" stroke="#F59E0B" strokeWidth="0.5" />
                   <polygon points="32,24 37.5,27 37.5,33 32,36 26.5,33 26.5,27" fill="#071E1C" opacity="0.22" />
-                </motion.g>
+                </g>
 
                 {/* Centre dot */}
                 <circle cx="24" cy="26" r="1.5" fill="#F5D78E" opacity="0.85" />
