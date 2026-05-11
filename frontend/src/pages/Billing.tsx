@@ -1,6 +1,7 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Check, ExternalLink, Palette, Shield, Brain, Lock, Globe } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Check, ExternalLink, Palette, Shield, Brain, Lock, Globe, ChevronDown } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Modal } from '@/components/ui/Modal'
@@ -121,7 +122,18 @@ export default function Billing() {
   const [currency, setCurrency] = useState<Currency>('USD')
   const [cancelOpen, setCancelOpen] = useState(false)
   const [upgrading, setUpgrading] = useState<string | null>(null)
+  const [whyOpen, setWhyOpen] = useState(false)
   const { user } = useAuthStore()
+  const location = useLocation()
+
+  useEffect(() => {
+    if ((location.state as { openWhyAeforyn?: boolean } | null)?.openWhyAeforyn) {
+      setWhyOpen(true)
+      setTimeout(() => {
+        document.getElementById('why-aeforyn')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 200)
+    }
+  }, [location.state])
 
   const currentPlan = user?.plan_tier || 'free'
 
@@ -353,6 +365,71 @@ export default function Billing() {
         </div>
       </div>
 
+      {/* Why Aeforyn? accordion */}
+      <motion.div
+        id="why-aeforyn"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="rounded-2xl overflow-hidden"
+        style={{ background: '#0A2422', border: '1px solid rgba(201,168,76,0.2)' }}
+      >
+        <button
+          onClick={() => setWhyOpen((o) => !o)}
+          className="w-full flex items-center justify-between px-6 py-5 text-left transition-colors hover:bg-white/3"
+        >
+          <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '20px', color: '#C9A84C' }}>
+            Why Aeforyn?
+          </span>
+          <motion.div animate={{ rotate: whyOpen ? 180 : 0 }} transition={{ duration: 0.25 }}>
+            <ChevronDown className="w-5 h-5 text-gold" />
+          </motion.div>
+        </button>
+        <AnimatePresence initial={false}>
+          {whyOpen && (
+            <motion.div
+              key="why-body"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-5" style={{ borderTop: '1px solid rgba(201,168,76,0.1)' }}>
+                {DIFFERENTIATORS.map((d, i) => {
+                  const Icon = d.icon
+                  return (
+                    <motion.div
+                      key={d.title}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.07 }}
+                      className="rounded-2xl p-5 flex items-start gap-4 transition-all duration-200 mt-5"
+                      style={{ background: 'rgba(201,168,76,0.04)', border: '1px solid rgba(201,168,76,0.12)' }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 0 12px rgba(245,158,11,0.15)' }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = 'none' }}
+                    >
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                        style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)' }}
+                      >
+                        <Icon className="w-5 h-5" style={{ color: '#C9A84C' }} />
+                      </div>
+                      <div>
+                        <h4 style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: '15px', color: '#F0FDF4', marginBottom: '6px' }}>
+                          {d.title}
+                        </h4>
+                        <p className="text-sm text-text-secondary leading-relaxed">{d.body}</p>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
       {/* Full feature comparison table */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -447,67 +524,6 @@ export default function Billing() {
               AEFORYN monitors for copycat accounts using your handle, avatar, and bio across Instagram, TikTok, YouTube, X, and Facebook. When we detect a potential impersonator, we alert you instantly and provide a one-click reporting workflow.
             </p>
           </div>
-        </div>
-      </motion.div>
-
-      {/* What makes AEFORYN different */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.45 }}
-        className="space-y-6"
-      >
-        <h2
-          style={{
-            fontFamily: 'Space Grotesk, sans-serif',
-            fontWeight: 700,
-            fontSize: '28px',
-            color: '#C9A84C',
-          }}
-        >
-          What makes AEFORYN different?
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {DIFFERENTIATORS.map((d, i) => {
-            const Icon = d.icon
-            return (
-              <motion.div
-                key={d.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + i * 0.08 }}
-                className="rounded-2xl p-5 flex items-start gap-4 transition-all duration-200"
-                style={{ background: '#0A2422', border: '1px solid rgba(201,168,76,0.15)' }}
-                onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLDivElement).style.boxShadow = '0 0 12px rgba(201,168,76,0.12)'
-                }}
-                onMouseLeave={(e) => {
-                  ;(e.currentTarget as HTMLDivElement).style.boxShadow = 'none'
-                }}
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-                  style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)' }}
-                >
-                  <Icon className="w-5 h-5" style={{ color: '#C9A84C' }} />
-                </div>
-                <div>
-                  <h4
-                    style={{
-                      fontFamily: 'Space Grotesk, sans-serif',
-                      fontWeight: 600,
-                      fontSize: '15px',
-                      color: '#F0FDF4',
-                      marginBottom: '6px',
-                    }}
-                  >
-                    {d.title}
-                  </h4>
-                  <p className="text-sm text-text-secondary leading-relaxed">{d.body}</p>
-                </div>
-              </motion.div>
-            )
-          })}
         </div>
       </motion.div>
 
