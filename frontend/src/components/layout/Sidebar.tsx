@@ -53,7 +53,7 @@ export function Sidebar() {
     >
       {/* Logo */}
       <div className="p-6 pb-4 border-b" style={{ borderColor: 'rgba(45,212,191,0.08)' }}>
-        <AeforynLogo size="md" showWordmark showTagline />
+        <AeforynLogo size="md" showWordmark showTagline clickable />
       </div>
 
       {/* User chip */}

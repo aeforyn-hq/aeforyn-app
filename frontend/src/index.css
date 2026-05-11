@@ -307,6 +307,34 @@ body::after {
     font-size: 20px;
     color: #F0FDF4;
   }
+
+  /* Global hover glow — applies to all interactive elements */
+  button:not(:disabled):hover,
+  a:hover,
+  [role="button"]:hover {
+    filter: drop-shadow(0 0 6px rgba(245,158,11,0.22));
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 0 20px rgba(245,158,11,0.45), 0 6px 30px rgba(201,168,76,0.4);
+  }
+
+  .btn-ghost:hover {
+    box-shadow: 0 0 12px rgba(245,158,11,0.25);
+  }
+
+  .btn-teal:hover {
+    box-shadow: 0 0 14px rgba(45,212,191,0.35);
+  }
+
+  .logo-link {
+    text-decoration: none !important;
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(245,158,11,0.2), inset 0 0 8px rgba(245,158,11,0.03); }
+    50% { box-shadow: 0 0 20px rgba(245,158,11,0.4), inset 0 0 12px rgba(245,158,11,0.06); }
+  }
 }
 
 @layer utilities {
