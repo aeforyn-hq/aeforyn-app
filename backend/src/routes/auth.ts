@@ -22,17 +22,25 @@ router.post('/signup', async (req: Request, res: Response): Promise<void> => {
     return
   }
 
-  if (data.user) {
-    await supabase.from('users').insert({
-      id: data.user.id,
-      email,
-      creator_handle: creator_handle || null,
-      platforms_connected: platforms || [],
-      plan_tier: 'free',
-    })
+  const { error: insertError } = await supabase.from('users').insert({
+    id: data.user.id,
+    email,
+    creator_handle: creator_handle || null,
+    platforms_connected: Array.isArray(platforms) ? platforms : [],
+    plan_tier: 'free',
+    storage_used_bytes: 0,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  })
+
+  if (insertError) {
+    // Auth user was created but profile insert failed — clean up the dangling auth user
+    await supabase.auth.admin.deleteUser(data.user.id)
+    res.status(500).json({ error: 'Failed to create user profile. Please try again.' })
+    return
   }
 
-  res.json({ message: 'Account created. Check your email to verify.', user_id: data.user?.id })
+  res.json({ message: 'Account created. Check your email to verify.', user_id: data.user.id })
 })
 
 router.post('/login', async (req: Request, res: Response): Promise<void> => {
