@@ -25,6 +25,8 @@ const allowedOrigins = env.FRONTEND_URL
   .split(',')
   .map((o) => o.trim())
   .filter(Boolean)
+// Hardcoded production origin — always allowed regardless of FRONTEND_URL env var
+if (!allowedOrigins.includes('https://aeforyn-app.vercel.app')) allowedOrigins.push('https://aeforyn-app.vercel.app')
 if (!allowedOrigins.includes('http://localhost:5173')) allowedOrigins.push('http://localhost:5173')
 if (!allowedOrigins.includes('http://localhost:3000')) allowedOrigins.push('http://localhost:3000')
 
