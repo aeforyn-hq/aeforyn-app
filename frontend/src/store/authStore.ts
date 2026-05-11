@@ -28,6 +28,7 @@ export const useAuthStore = create<AuthState>()(
       },
       logout: () => {
         localStorage.removeItem('aeforyn_token')
+        localStorage.removeItem('aeforyn-auth')
         set({ user: null, token: null, isAuthenticated: false })
       },
     }),
