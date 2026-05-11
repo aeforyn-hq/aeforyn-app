@@ -2,8 +2,9 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   User, Bell, Download, Trash2, Eye, EyeOff, Check, X,
-  Shield, Zap, Star, Globe, Lock, Cpu, Wifi, Target, Anchor, Flame, Crown,
+  Shield, Lock,
 } from 'lucide-react'
+import { AvatarPicker, AvatarDisplay, type AvatarId } from '@/components/ui/AvatarSVG'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
@@ -14,27 +15,6 @@ import { toast } from '@/store/toastStore'
 import { PLATFORM_LABELS, timeAgo } from '@/lib/utils'
 import { cn } from '@/lib/utils'
 import { useNavigate } from 'react-router-dom'
-
-// ---------------------------------------------------------------------------
-// Avatar definitions
-// ---------------------------------------------------------------------------
-
-const AVATARS = [
-  { id: 'shield',  icon: Shield,  bg: 'linear-gradient(135deg, #C9A84C, #9A7A35)', fg: '#071E1C' },
-  { id: 'zap',    icon: Zap,     bg: 'linear-gradient(135deg, #2DD4BF, #0D9488)', fg: '#071E1C' },
-  { id: 'star',   icon: Star,    bg: 'linear-gradient(135deg, #E4C46A, #C9A84C)', fg: '#071E1C' },
-  { id: 'globe',  icon: Globe,   bg: 'linear-gradient(135deg, #4ADE80, #22C55E)', fg: '#071E1C' },
-  { id: 'lock',   icon: Lock,    bg: 'linear-gradient(135deg, #EF4444, #DC2626)', fg: '#FFFFFF' },
-  { id: 'eye',    icon: Eye,     bg: 'linear-gradient(135deg, #9146FF, #7C3AED)', fg: '#FFFFFF' },
-  { id: 'cpu',    icon: Cpu,     bg: 'linear-gradient(135deg, #F59E0B, #D97706)', fg: '#071E1C' },
-  { id: 'wifi',   icon: Wifi,    bg: 'linear-gradient(135deg, #2DD4BF, #C9A84C)', fg: '#071E1C' },
-  { id: 'target', icon: Target,  bg: 'linear-gradient(135deg, #EF4444, #F59E0B)', fg: '#FFFFFF' },
-  { id: 'anchor', icon: Anchor,  bg: 'linear-gradient(135deg, #0A66C2, #2DD4BF)', fg: '#FFFFFF' },
-  { id: 'flame',  icon: Flame,   bg: 'linear-gradient(135deg, #FF6719, #EF4444)', fg: '#FFFFFF' },
-  { id: 'crown',  icon: Crown,   bg: 'linear-gradient(135deg, #E4C46A, #9A7A35)', fg: '#071E1C' },
-] as const
-
-type AvatarId = typeof AVATARS[number]['id']
 
 // ---------------------------------------------------------------------------
 // Tab config
@@ -68,20 +48,6 @@ function Toggle({ value, onChange }: { value: boolean; onChange: (v: boolean) =>
   )
 }
 
-/** Renders a single avatar circle at the given size. */
-function AvatarCircle({ avatarId, size = 64 }: { avatarId: AvatarId; size?: number }) {
-  const avatar = AVATARS.find((a) => a.id === avatarId) ?? AVATARS[0]
-  const Icon = avatar.icon
-  const iconSize = Math.round(size * 0.44)
-  return (
-    <div
-      className="rounded-full flex items-center justify-center flex-shrink-0"
-      style={{ width: size, height: size, background: avatar.bg }}
-    >
-      <Icon style={{ width: iconSize, height: iconSize, color: avatar.fg }} />
-    </div>
-  )
-}
 
 // ---------------------------------------------------------------------------
 // Profile tab
@@ -92,7 +58,7 @@ const BIO_MAX = 160
 function ProfileTab() {
   const { user, setUser } = useAuthStore()
 
-  const [avatarId, setAvatarId]   = useState<AvatarId>('shield')
+  const [avatarId, setAvatarId]   = useState<AvatarId>(((user as { avatar?: string })?.avatar as AvatarId) || 'a1')
   const [handle, setHandle]       = useState(user?.creator_handle || '')
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio]             = useState('')
@@ -109,7 +75,7 @@ function ProfileTab() {
         website,
         avatar: avatarId,
       })
-      setUser({ ...user!, creator_handle: data.creator_handle })
+      setUser({ ...user!, creator_handle: data.creator_handle, avatar: avatarId } as typeof user & { avatar: string })
       toast.success('Profile updated')
     } catch {
       toast.error('Failed to save changes')
@@ -130,60 +96,12 @@ function ProfileTab() {
         <h3 className="heading-card mb-6">Profile Information</h3>
         <div className="space-y-5">
 
-          {/* Avatar display + meta */}
-          <div className="flex items-center gap-5">
-            <AvatarCircle avatarId={avatarId} size={64} />
-            <div>
-              <p className="text-sm font-medium text-text-primary">{user?.email}</p>
-              <p className="text-xs text-text-secondary mt-0.5">
-                Choose an avatar below
-              </p>
-            </div>
-          </div>
-
-          {/* Avatar selector grid */}
+          {/* Avatar picker */}
           <div>
-            <p
-              className="text-xs font-medium uppercase tracking-widest text-gold mb-3"
-              style={{ letterSpacing: '1.5px' }}
-            >
-              Choose Avatar
+            <p className="text-xs font-medium uppercase tracking-widest text-gold mb-3" style={{ letterSpacing: '1.5px' }}>
+              Your Avatar
             </p>
-            <div className="grid grid-cols-6 gap-3">
-              {AVATARS.map((av) => {
-                const Icon = av.icon
-                const selected = avatarId === av.id
-                return (
-                  <button
-                    key={av.id}
-                    type="button"
-                    onClick={() => setAvatarId(av.id)}
-                    className="relative rounded-full transition-all duration-150 focus:outline-none"
-                    style={{
-                      width: 48,
-                      height: 48,
-                      background: av.bg,
-                      boxShadow: selected
-                        ? '0 0 0 2px #071E1C, 0 0 0 4px #C9A84C'
-                        : '0 0 0 2px transparent',
-                    }}
-                    title={av.id}
-                  >
-                    <Icon
-                      style={{
-                        width: 22,
-                        height: 22,
-                        color: av.fg,
-                        position: 'absolute',
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)',
-                      }}
-                    />
-                  </button>
-                )
-              })}
-            </div>
+            <AvatarPicker value={avatarId} onChange={setAvatarId} />
           </div>
 
           {/* Email (read-only) */}

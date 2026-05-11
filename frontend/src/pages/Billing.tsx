@@ -1,6 +1,8 @@
-import { useState } from 'react'
-import { motion } from 'framer-motion'
-import { Check, ExternalLink, Palette, Shield, Brain, Lock, Globe } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Check, ExternalLink, Palette, Shield, Brain, Lock, Globe, ChevronDown } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
+import { PlatformIcon } from '@/components/ui/PlatformIcon'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Modal } from '@/components/ui/Modal'
@@ -40,7 +42,7 @@ const PLANS: Plan[] = [
     usdPrice: 29,
     zarPrice: 529,
     description: 'Solo creators and freelancers levelling up',
-    highlights: ['10 platforms monitored', 'Advanced threat alerts', '50 phishing scans/month', '25 GB vault storage', 'Recovery playbooks', 'Impersonation detection'],
+    highlights: ['10 platforms monitored', 'Advanced threat alerts', '50 phishing scans/month', '25 GB vault storage', 'Recovery playbooks', 'Impersonation monitoring + email alerts'],
     cta: 'Upgrade to Standard',
   },
   {
@@ -49,7 +51,7 @@ const PLANS: Plan[] = [
     usdPrice: 49,
     zarPrice: 899,
     description: 'Full-time creators who depend on their brand',
-    highlights: ['Unlimited platforms', 'Real-time threat alerts', 'Unlimited phishing scans', '100 GB vault storage', 'AI assistant + resolution guide', 'Recovery playbooks', 'Priority support', 'Impersonation detection'],
+    highlights: ['Unlimited platforms', 'Real-time threat alerts', 'Unlimited phishing scans', '100 GB vault storage', 'AI assistant + resolution guide', 'Recovery playbooks', 'Priority support', 'Full impersonation detection + takedown tools'],
     badge: 'Most Popular',
     mostPopular: true,
     isGold: true,
@@ -75,7 +77,7 @@ const FEATURE_TABLE: FeatureRow[] = [
   { label: 'AI resolution guide', free: false, standard: false, pro: true },
   { label: 'Recovery playbooks', free: false, standard: true, pro: true },
   { label: 'Priority support', free: false, standard: false, pro: true },
-  { label: 'Account impersonation detection', free: false, standard: true, pro: true },
+  { label: 'Account impersonation detection', free: false, standard: 'Monitor only', pro: 'Full detection' },
 ]
 
 const DIFFERENTIATORS = [
@@ -121,7 +123,18 @@ export default function Billing() {
   const [currency, setCurrency] = useState<Currency>('USD')
   const [cancelOpen, setCancelOpen] = useState(false)
   const [upgrading, setUpgrading] = useState<string | null>(null)
+  const [whyOpen, setWhyOpen] = useState(false)
   const { user } = useAuthStore()
+  const location = useLocation()
+
+  useEffect(() => {
+    if ((location.state as { openWhyAeforyn?: boolean } | null)?.openWhyAeforyn) {
+      setWhyOpen(true)
+      setTimeout(() => {
+        document.getElementById('why-aeforyn')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 200)
+    }
+  }, [location.state])
 
   const currentPlan = user?.plan_tier || 'free'
 
@@ -353,6 +366,132 @@ export default function Billing() {
         </div>
       </div>
 
+      {/* Why Aeforyn? accordion */}
+      <motion.div
+        id="why-aeforyn"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="rounded-2xl overflow-hidden"
+        style={{ background: '#0A2422', border: '1px solid rgba(201,168,76,0.2)' }}
+      >
+        <button
+          onClick={() => setWhyOpen((o) => !o)}
+          className="w-full flex items-center justify-between px-6 py-5 text-left transition-colors hover:bg-white/3"
+        >
+          <span style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '20px', color: '#C9A84C' }}>
+            Why Aeforyn?
+          </span>
+          <motion.div animate={{ rotate: whyOpen ? 180 : 0 }} transition={{ duration: 0.25 }}>
+            <ChevronDown className="w-5 h-5 text-gold" />
+          </motion.div>
+        </button>
+        <AnimatePresence initial={false}>
+          {whyOpen && (
+            <motion.div
+              key="why-body"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              className="overflow-hidden"
+            >
+              <div className="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-5" style={{ borderTop: '1px solid rgba(201,168,76,0.1)' }}>
+                {DIFFERENTIATORS.map((d, i) => {
+                  const Icon = d.icon
+                  return (
+                    <motion.div
+                      key={d.title}
+                      initial={{ opacity: 0, y: 16 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.07 }}
+                      className="rounded-2xl p-5 flex items-start gap-4 transition-all duration-200 mt-5"
+                      style={{ background: 'rgba(201,168,76,0.04)', border: '1px solid rgba(201,168,76,0.12)' }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = '0 0 12px rgba(245,158,11,0.15)' }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = 'none' }}
+                    >
+                      <div
+                        className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+                        style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)' }}
+                      >
+                        <Icon className="w-5 h-5" style={{ color: '#C9A84C' }} />
+                      </div>
+                      <div>
+                        <h4 style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 600, fontSize: '15px', color: '#F0FDF4', marginBottom: '6px' }}>
+                          {d.title}
+                        </h4>
+                        <p className="text-sm text-text-secondary leading-relaxed">{d.body}</p>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+
+      {/* Impersonation detection callout — prominent, above feature table */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.32 }}
+        className="rounded-2xl p-6"
+        style={{
+          background: 'rgba(245,158,11,0.05)',
+          border: '2px solid #F59E0B',
+          boxShadow: '0 0 24px rgba(245,158,11,0.18), inset 0 0 20px rgba(245,158,11,0.04)',
+          animation: 'glow-pulse 3s ease-in-out infinite',
+        }}
+      >
+        <div className="flex items-start gap-4">
+          <div
+            className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
+            style={{ background: 'rgba(245,158,11,0.12)', border: '1px solid rgba(245,158,11,0.35)' }}
+          >
+            <Shield className="w-5 h-5" style={{ color: '#F59E0B' }} />
+          </div>
+          <div className="flex-1">
+            <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '17px', color: '#F0FDF4', marginBottom: '8px' }}>
+              Account Impersonation Detection
+            </h3>
+            <p className="text-sm text-text-secondary leading-relaxed mb-3">
+              AEFORYN monitors for copycat accounts using your handle, avatar, and bio.
+            </p>
+            <div className="flex items-center gap-3 mb-4">
+              {['instagram', 'tiktok', 'youtube', 'x', 'facebook', 'linkedin'].map((p) => (
+                <div
+                  key={p}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(245,158,11,0.15)' }}
+                  title={p}
+                >
+                  <PlatformIcon platform={p} size={15} />
+                </div>
+              ))}
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="rounded-xl p-3" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}>
+                <p className="text-xs font-semibold mb-1" style={{ color: '#F59E0B' }}>Standard — Monitoring Only</p>
+                <ul className="text-xs text-text-secondary space-y-0.5">
+                  <li>• Cross-platform handle monitoring</li>
+                  <li>• Email notifications on detection</li>
+                </ul>
+              </div>
+              <div className="rounded-xl p-3" style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.25)' }}>
+                <p className="text-xs font-semibold mb-1" style={{ color: '#C9A84C' }}>Pro — Full Detection</p>
+                <ul className="text-xs text-text-secondary space-y-0.5">
+                  <li>• AI risk analysis + takedown guide</li>
+                  <li>• Fake account tracker</li>
+                  <li>• Brand deal phishing scanner</li>
+                  <li>• Real-time alert overlay + monthly report</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
       {/* Full feature comparison table */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -405,7 +544,18 @@ export default function Billing() {
                     borderBottom: idx < FEATURE_TABLE.length - 1 ? '1px solid rgba(201,168,76,0.06)' : 'none',
                   }}
                 >
-                  <td className="px-6 py-3.5 text-text-secondary">{row.label}</td>
+                  <td className="px-6 py-3.5 text-text-secondary">
+                    <span className="flex items-center gap-2">
+                      {row.label === 'Account impersonation detection' && (
+                        <span className="flex items-center gap-1">
+                          {['instagram','tiktok','youtube','x','facebook'].map((p) => (
+                            <PlatformIcon key={p} platform={p} size={12} />
+                          ))}
+                        </span>
+                      )}
+                      {row.label}
+                    </span>
+                  </td>
                   <td className="px-4 py-3.5"><FeatureCell value={row.free} /></td>
                   <td className="px-4 py-3.5"><FeatureCell value={row.standard} /></td>
                   <td className="px-4 py-3.5"><FeatureCell value={row.pro} /></td>
@@ -413,101 +563,6 @@ export default function Billing() {
               ))}
             </tbody>
           </table>
-        </div>
-      </motion.div>
-
-      {/* Impersonation detection callout */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="rounded-2xl p-6"
-        style={{ background: 'rgba(45,212,191,0.04)', border: '1.5px solid rgba(45,212,191,0.35)' }}
-      >
-        <div className="flex items-start gap-4">
-          <div
-            className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-            style={{ background: 'rgba(45,212,191,0.1)', border: '1px solid rgba(45,212,191,0.2)' }}
-          >
-            <Shield className="w-5 h-5" style={{ color: '#2DD4BF' }} />
-          </div>
-          <div>
-            <h3
-              style={{
-                fontFamily: 'Space Grotesk, sans-serif',
-                fontWeight: 700,
-                fontSize: '17px',
-                color: '#F0FDF4',
-                marginBottom: '8px',
-              }}
-            >
-              Account impersonation detection — included in Standard &amp; Pro
-            </h3>
-            <p className="text-sm text-text-secondary leading-relaxed">
-              AEFORYN monitors for copycat accounts using your handle, avatar, and bio across Instagram, TikTok, YouTube, X, and Facebook. When we detect a potential impersonator, we alert you instantly and provide a one-click reporting workflow.
-            </p>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* What makes AEFORYN different */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.45 }}
-        className="space-y-6"
-      >
-        <h2
-          style={{
-            fontFamily: 'Space Grotesk, sans-serif',
-            fontWeight: 700,
-            fontSize: '28px',
-            color: '#C9A84C',
-          }}
-        >
-          What makes AEFORYN different?
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          {DIFFERENTIATORS.map((d, i) => {
-            const Icon = d.icon
-            return (
-              <motion.div
-                key={d.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 + i * 0.08 }}
-                className="rounded-2xl p-5 flex items-start gap-4 transition-all duration-200"
-                style={{ background: '#0A2422', border: '1px solid rgba(201,168,76,0.15)' }}
-                onMouseEnter={(e) => {
-                  ;(e.currentTarget as HTMLDivElement).style.boxShadow = '0 0 12px rgba(201,168,76,0.12)'
-                }}
-                onMouseLeave={(e) => {
-                  ;(e.currentTarget as HTMLDivElement).style.boxShadow = 'none'
-                }}
-              >
-                <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 mt-0.5"
-                  style={{ background: 'rgba(201,168,76,0.1)', border: '1px solid rgba(201,168,76,0.2)' }}
-                >
-                  <Icon className="w-5 h-5" style={{ color: '#C9A84C' }} />
-                </div>
-                <div>
-                  <h4
-                    style={{
-                      fontFamily: 'Space Grotesk, sans-serif',
-                      fontWeight: 600,
-                      fontSize: '15px',
-                      color: '#F0FDF4',
-                      marginBottom: '6px',
-                    }}
-                  >
-                    {d.title}
-                  </h4>
-                  <p className="text-sm text-text-secondary leading-relaxed">{d.body}</p>
-                </div>
-              </motion.div>
-            )
-          })}
         </div>
       </motion.div>
 

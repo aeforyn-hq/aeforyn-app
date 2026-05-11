@@ -239,8 +239,8 @@ const DEMO_EVENTS: Record<string, { time: string; text: string; type: 'safe' | '
 // ─── Tier limits ─────────────────────────────────────────────────────────────
 
 function getTierLimit(planTier: string): number {
-  if (planTier === 'free') return 3
-  if (planTier === 'standard') return 10
+  if (planTier === 'free') return 1
+  if (planTier === 'standard') return 5
   return Infinity
 }
 
@@ -728,18 +728,19 @@ function AvailableCard({
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export default function Monitoring() {
-  const [search, setSearch] = useState('')
-  const [activeCategory, setActiveCategory] = useState<Category>('all')
-  const [detailPlatform, setDetailPlatform] = useState<ConnectedPlatform | null>(null)
-  const [connectedIds, setConnectedIds] = useState<Set<string>>(
-    new Set(DEMO_CONNECTED.map((p) => p.platform))
-  )
-  const [connectedList, setConnectedList] = useState<ConnectedPlatform[]>(DEMO_CONNECTED)
-
   const { user } = useAuthStore()
   const planTier = user?.plan_tier || 'free'
   const tierLimit = getTierLimit(planTier)
   const isUnlimited = tierLimit === Infinity
+  const demoForTier = isUnlimited ? DEMO_CONNECTED : DEMO_CONNECTED.slice(0, tierLimit)
+
+  const [search, setSearch] = useState('')
+  const [activeCategory, setActiveCategory] = useState<Category>('all')
+  const [detailPlatform, setDetailPlatform] = useState<ConnectedPlatform | null>(null)
+  const [connectedIds, setConnectedIds] = useState<Set<string>>(
+    new Set(demoForTier.map((p) => p.platform))
+  )
+  const [connectedList, setConnectedList] = useState<ConnectedPlatform[]>(demoForTier)
 
   // Fetch from API but fall back to demo data
   useQuery({
@@ -813,9 +814,9 @@ export default function Monitoring() {
 
   const tierLabel =
     planTier === 'free'
-      ? 'Free — 3 platforms max'
+      ? 'Free — 1 platform max'
       : planTier === 'standard'
-      ? 'Standard — 10 platforms max'
+      ? 'Standard — 5 platforms max'
       : 'Pro — Unlimited'
 
   const catTabColor = '#C9A84C'

@@ -1,6 +1,7 @@
 import { Router, Response } from 'express'
 import { requireAuth, AuthRequest } from '../middleware/auth.js'
 import { supabase } from '../db/supabase.js'
+import { PLAN_LIMITS } from '../config/planLimits.js'
 
 const router = Router()
 
@@ -23,6 +24,20 @@ router.post('/platforms', requireAuth, async (req: AuthRequest, res: Response): 
     .single()
 
   if (existing) { res.status(400).json({ error: 'Platform already connected' }); return }
+
+  // Enforce plan platform limits
+  const planTier = (req.userPlan || 'free') as keyof typeof PLAN_LIMITS
+  const limits = PLAN_LIMITS[planTier] || PLAN_LIMITS.free
+  if (limits.max_platforms !== -1) {
+    const { count } = await supabase
+      .from('platforms_connected')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', req.userId!)
+    if ((count ?? 0) >= limits.max_platforms) {
+      res.status(403).json({ error: `Your plan allows a maximum of ${limits.max_platforms} platform${limits.max_platforms === 1 ? '' : 's'}. Upgrade to add more.` })
+      return
+    }
+  }
 
   const { data, error } = await supabase.from('platforms_connected').insert({
     user_id: req.userId!,

@@ -5,8 +5,8 @@
 :root {
   --bg-primary:      #071E1C;
   --bg-secondary:    #051614;
-  --bg-card:         #0A2422;
-  --bg-card-hover:   #0D2E2B;
+  --bg-card:         #071426;
+  --bg-card-hover:   #0A1A2E;
   --bg-input:        #091F1D;
   --gold:            #C9A84C;
   --gold-light:      #E4C46A;
@@ -175,34 +175,53 @@ body::after {
   }
 
   .card {
-    @apply relative overflow-hidden rounded-card transition-all duration-200;
-    background: #0A2422;
-    border: 1px solid rgba(201,168,76,0.15);
+    @apply relative overflow-hidden rounded-card transition-all duration-300;
+    background: #071426;
+    border: 1px solid rgba(245,158,11,0.18);
     padding: 28px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(245,158,11,0.06);
   }
   .card::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(201,168,76,0.4), transparent);
+    background: linear-gradient(90deg, transparent, rgba(245,158,11,0.5), rgba(201,168,76,0.7), rgba(245,158,11,0.5), transparent);
     opacity: 0;
-    transition: opacity 0.25s ease;
+    transition: opacity 0.3s ease;
+  }
+  .card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(245,158,11,0.04), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
   }
   .card:hover {
-    border-color: rgba(201,168,76,0.30);
-    background: #0D2E2B;
-    box-shadow: 0 0 12px rgba(201,168,76,0.12);
+    border-color: rgba(245,158,11,0.45);
+    background: #0A1A2E;
+    box-shadow: 0 0 24px rgba(245,158,11,0.18), 0 0 48px rgba(245,158,11,0.07), inset 0 1px 0 rgba(245,158,11,0.12);
+    transform: translateY(-1px);
   }
-  .card:hover::before {
-    opacity: 1;
-  }
+  .card:hover::before { opacity: 1; }
+  .card:hover::after { opacity: 1; }
 
   .card-static {
     @apply relative overflow-hidden rounded-card;
-    background: #0A2422;
-    border: 1px solid rgba(201,168,76,0.15);
+    background: #071426;
+    border: 1px solid rgba(245,158,11,0.18);
     padding: 28px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.35), inset 0 1px 0 rgba(245,158,11,0.05);
+  }
+  .card-static::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(245,158,11,0.4), transparent);
   }
 
   .input-field {
@@ -291,21 +310,60 @@ body::after {
     letter-spacing: -1px;
     line-height: 1.1;
     color: #F0FDF4;
+    text-shadow: 0 0 30px rgba(245,158,11,0.12), 0 0 60px rgba(201,168,76,0.06);
   }
 
   .heading-section {
     font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 28px;
     letter-spacing: -0.5px;
     color: #F0FDF4;
+    text-shadow: 0 0 20px rgba(245,158,11,0.1);
   }
 
   .heading-card {
     font-family: 'Space Grotesk', sans-serif;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 20px;
     color: #F0FDF4;
+    text-shadow: 0 0 14px rgba(245,158,11,0.08);
+  }
+
+  .heading-sub {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: #F0FDF4;
+    letter-spacing: 0.2px;
+  }
+
+  /* Global hover glow — applies to all interactive elements */
+  button:not(:disabled):hover,
+  a:hover,
+  [role="button"]:hover {
+    filter: drop-shadow(0 0 6px rgba(245,158,11,0.22));
+  }
+
+  .btn-primary:hover {
+    box-shadow: 0 0 20px rgba(245,158,11,0.45), 0 6px 30px rgba(201,168,76,0.4);
+  }
+
+  .btn-ghost:hover {
+    box-shadow: 0 0 12px rgba(245,158,11,0.25);
+  }
+
+  .btn-teal:hover {
+    box-shadow: 0 0 14px rgba(45,212,191,0.35);
+  }
+
+  .logo-link {
+    text-decoration: none !important;
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(245,158,11,0.2), inset 0 0 8px rgba(245,158,11,0.03); }
+    50% { box-shadow: 0 0 20px rgba(245,158,11,0.4), inset 0 0 12px rgba(245,158,11,0.06); }
   }
 }
 
