@@ -90,7 +90,7 @@ export const AeforynLogo: React.FC<AeforynLogoProps> = ({
       </div>
 
       {showWordmark && (
-        <div className="flex flex-col relative">
+        <div className="flex flex-col">
           {/* Gold metallic text */}
           <span
             style={{
