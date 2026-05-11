@@ -1,3 +1,4 @@
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/authStore'
 import { ToastContainer } from '@/components/ui/Toast'
@@ -36,7 +37,19 @@ function PublicRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+function CatchAll() {
+  const { isAuthenticated } = useAuthStore()
+  return <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />
+}
+
 export default function App() {
+  const { token, isAuthenticated, logout } = useAuthStore()
+
+  // Clear stale persisted auth if there is no token stored
+  useEffect(() => {
+    if (isAuthenticated && !token) logout()
+  }, [])
+
   return (
     <BrowserRouter>
       <Routes>
@@ -64,7 +77,7 @@ export default function App() {
           <Route path="/shared-access" element={<SharedAccess />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/dashboard" replace />} />
+        <Route path="*" element={<CatchAll />} />
       </Routes>
       <ToastContainer />
       <CookieBanner />
