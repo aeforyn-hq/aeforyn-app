@@ -120,16 +120,40 @@ export default function PhishingScanner() {
             exit={{ opacity: 0, scale: 0.95 }}
             className="card-static text-center py-10"
           >
-            <div className="w-20 h-20 mx-auto mb-5 relative">
-              <div className="absolute inset-0 rounded-full animate-ping" style={{ background: 'rgba(45,212,191,0.15)' }} />
-              <div className="relative w-20 h-20 rounded-full flex items-center justify-center" style={{ background: 'rgba(45,212,191,0.1)', border: '2px solid rgba(45,212,191,0.3)' }}>
-                <Shield className="w-10 h-10 text-teal" />
-              </div>
+            <div className="w-24 h-24 mx-auto mb-5 relative flex items-center justify-center">
+              {/* Outer pulse ring */}
+              <motion.div
+                className="absolute inset-0 rounded-full"
+                style={{ background: 'rgba(245,158,11,0.12)' }}
+                animate={{ scale: [1, 1.5, 1], opacity: [0.6, 0, 0.6] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
+              />
+              {/* Mid pulse ring */}
+              <motion.div
+                className="absolute inset-2 rounded-full"
+                style={{ background: 'rgba(245,158,11,0.1)' }}
+                animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeOut', delay: 0.4 }}
+              />
+              {/* Shield container */}
+              <motion.div
+                className="relative w-16 h-16 rounded-full flex items-center justify-center z-10"
+                style={{ background: 'rgba(245,158,11,0.1)', border: '2px solid rgba(245,158,11,0.5)' }}
+                animate={{ boxShadow: ['0 0 12px rgba(245,158,11,0.3)', '0 0 32px rgba(245,158,11,0.65)', '0 0 12px rgba(245,158,11,0.3)'] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
+              >
+                <motion.div
+                  animate={{ scale: [1, 1.08, 1], rotate: [0, 3, -3, 0] }}
+                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                  <Shield className="w-8 h-8" style={{ color: '#F59E0B', filter: 'drop-shadow(0 0 6px rgba(245,158,11,0.7))' }} />
+                </motion.div>
+              </motion.div>
             </div>
-            <p className="mono-text text-sm text-teal tracking-widest" style={{ letterSpacing: '3px' }}>SCANNING FOR THREATS...</p>
+            <p className="mono-text text-sm tracking-widest" style={{ letterSpacing: '3px', color: '#F59E0B' }}>SCANNING FOR THREATS...</p>
             <div className="flex items-center justify-center gap-2 mt-3">
               {[0,1,2].map((i) => (
-                <motion.div key={i} className="w-2 h-2 rounded-full bg-teal"
+                <motion.div key={i} className="w-2 h-2 rounded-full" style={{ background: '#F59E0B' }}
                   animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.3 }} />
               ))}
             </div>
