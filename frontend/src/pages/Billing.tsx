@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Check, ExternalLink, Palette, Shield, Brain, Lock, Globe, ChevronDown } from 'lucide-react'
 import { useLocation } from 'react-router-dom'
+import { PlatformIcon } from '@/components/ui/PlatformIcon'
 import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { Modal } from '@/components/ui/Modal'
@@ -454,9 +455,21 @@ export default function Billing() {
             <h3 style={{ fontFamily: 'Space Grotesk, sans-serif', fontWeight: 700, fontSize: '17px', color: '#F0FDF4', marginBottom: '8px' }}>
               Account Impersonation Detection
             </h3>
-            <p className="text-sm text-text-secondary leading-relaxed mb-4">
-              AEFORYN monitors for copycat accounts using your handle, avatar, and bio across Instagram, TikTok, YouTube, X, and Facebook.
+            <p className="text-sm text-text-secondary leading-relaxed mb-3">
+              AEFORYN monitors for copycat accounts using your handle, avatar, and bio.
             </p>
+            <div className="flex items-center gap-3 mb-4">
+              {['instagram', 'tiktok', 'youtube', 'x', 'facebook', 'linkedin'].map((p) => (
+                <div
+                  key={p}
+                  className="w-7 h-7 rounded-lg flex items-center justify-center"
+                  style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(245,158,11,0.15)' }}
+                  title={p}
+                >
+                  <PlatformIcon platform={p} size={15} />
+                </div>
+              ))}
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="rounded-xl p-3" style={{ background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.2)' }}>
                 <p className="text-xs font-semibold mb-1" style={{ color: '#F59E0B' }}>Standard — Monitoring Only</p>
@@ -531,7 +544,18 @@ export default function Billing() {
                     borderBottom: idx < FEATURE_TABLE.length - 1 ? '1px solid rgba(201,168,76,0.06)' : 'none',
                   }}
                 >
-                  <td className="px-6 py-3.5 text-text-secondary">{row.label}</td>
+                  <td className="px-6 py-3.5 text-text-secondary">
+                    <span className="flex items-center gap-2">
+                      {row.label === 'Account impersonation detection' && (
+                        <span className="flex items-center gap-1">
+                          {['instagram','tiktok','youtube','x','facebook'].map((p) => (
+                            <PlatformIcon key={p} platform={p} size={12} />
+                          ))}
+                        </span>
+                      )}
+                      {row.label}
+                    </span>
+                  </td>
                   <td className="px-4 py-3.5"><FeatureCell value={row.free} /></td>
                   <td className="px-4 py-3.5"><FeatureCell value={row.standard} /></td>
                   <td className="px-4 py-3.5"><FeatureCell value={row.pro} /></td>

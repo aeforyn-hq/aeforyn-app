@@ -5,6 +5,7 @@ import { LifeBuoy, CheckCircle, ChevronRight, Bot, Lock, ArrowLeft, Clock, Copy,
 import { Link } from 'react-router-dom'
 import { Button } from '@/components/ui/Button'
 import { ProgressBar } from '@/components/ui/ProgressBar'
+import { PlatformIcon } from '@/components/ui/PlatformIcon'
 import { api } from '@/lib/api'
 import { toast } from '@/store/toastStore'
 import { useAuthStore } from '@/store/authStore'
@@ -35,6 +36,7 @@ const PLATFORMS = [
   { id: 'shopify', label: 'Shopify' },
   { id: 'etsy', label: 'Etsy' },
   { id: 'gumroad', label: 'Gumroad' },
+  { id: 'threads', label: 'Threads' },
 ]
 
 const INCIDENT_TYPES = [
@@ -434,21 +436,23 @@ export default function Recovery() {
         <p className="text-xs font-semibold uppercase tracking-widest text-text-secondary mb-4" style={{ letterSpacing: '1.5px' }}>
           Which platform are you having issues with?
         </p>
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
           {PLATFORMS.map((p) => (
             <button
               key={p.id}
               onClick={() => { setSelectedPlatform(p.id); setSelectedIncident('') }}
-              className="p-5 rounded-2xl text-center font-semibold transition-all duration-150"
+              className="flex items-center gap-2.5 px-3 py-3 rounded-xl text-left font-semibold transition-all duration-150"
               style={{
                 fontFamily: 'Space Grotesk, sans-serif',
-                fontSize: '16px',
-                background: selectedPlatform === p.id ? 'rgba(201,168,76,0.1)' : '#0A2422',
-                border: `1px solid ${selectedPlatform === p.id ? 'rgba(201,168,76,0.5)' : 'rgba(45,212,191,0.1)'}`,
+                fontSize: '13px',
+                background: selectedPlatform === p.id ? 'rgba(201,168,76,0.1)' : 'rgba(7,20,38,0.7)',
+                border: `1px solid ${selectedPlatform === p.id ? 'rgba(201,168,76,0.5)' : 'rgba(245,158,11,0.1)'}`,
                 color: selectedPlatform === p.id ? '#C9A84C' : '#F0FDF4',
+                boxShadow: selectedPlatform === p.id ? '0 0 12px rgba(245,158,11,0.15)' : 'none',
               }}
             >
-              {p.label}
+              <PlatformIcon platform={p.id} size={16} className="flex-shrink-0" />
+              <span className="truncate">{p.label}</span>
             </button>
           ))}
         </div>
