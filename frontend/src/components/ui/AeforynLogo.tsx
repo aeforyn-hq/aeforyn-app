@@ -90,25 +90,7 @@ export const AeforynLogo: React.FC<AeforynLogoProps> = ({
       </div>
 
       {showWordmark && (
-        <div className="flex flex-col relative">
-          {/* 3D shadow text layer */}
-          <span
-            aria-hidden
-            style={{
-              fontFamily: 'Space Grotesk, sans-serif',
-              fontWeight: 700,
-              fontSize: wordmarkSizes[size],
-              letterSpacing: '4px',
-              lineHeight: 1,
-              color: '#7A5F28',
-              position: 'absolute',
-              top: '2px',
-              left: '2px',
-              userSelect: 'none',
-            }}
-          >
-            AEFORYN
-          </span>
+        <div className="flex flex-col">
           {/* Gold metallic text */}
           <span
             style={{
@@ -122,8 +104,6 @@ export const AeforynLogo: React.FC<AeforynLogoProps> = ({
               backgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               filter: 'drop-shadow(0 0 6px rgba(245,158,11,0.5))',
-              position: 'relative',
-              zIndex: 1,
             }}
           >
             AEFORYN
