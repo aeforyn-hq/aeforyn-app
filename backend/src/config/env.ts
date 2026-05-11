@@ -1,6 +1,3 @@
-import dotenv from 'dotenv'
-dotenv.config()
-
 export const env = {
   PORT: parseInt(process.env.PORT || '3001', 10),
   SUPABASE_URL: process.env.SUPABASE_URL || '',
@@ -8,7 +5,7 @@ export const env = {
   R2_ACCOUNT_ID: process.env.R2_ACCOUNT_ID || '',
   R2_ACCESS_KEY_ID: process.env.R2_ACCESS_KEY_ID || '',
   R2_SECRET_ACCESS_KEY: process.env.R2_SECRET_ACCESS_KEY || '',
-  R2_BUCKET_NAME: process.env.R2_BUCKET_NAME || 'aeforyn-vault-dev',
+  R2_BUCKET_NAME: process.env.R2_BUCKET_NAME || 'aeforyn-vault',
   R2_PUBLIC_URL: process.env.R2_PUBLIC_URL || '',
   STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY || '',
   STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET || '',
