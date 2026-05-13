@@ -26,29 +26,32 @@ import SharedAccess from '@/pages/SharedAccess'
 import DelegateAccess from '@/pages/DelegateAccess'
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, hasHydrated } = useAuthStore()
+  if (!hasHydrated) return <div className="flex h-screen items-center justify-center" style={{ background: '#071E1C' }}><div className="w-6 h-6 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" /></div>
   if (!isAuthenticated) return <Navigate to="/login" replace />
   return <>{children}</>
 }
 
 function PublicRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, hasHydrated } = useAuthStore()
+  if (!hasHydrated) return null
   if (isAuthenticated) return <Navigate to="/dashboard" replace />
   return <>{children}</>
 }
 
 function CatchAll() {
-  const { isAuthenticated } = useAuthStore()
+  const { isAuthenticated, hasHydrated } = useAuthStore()
+  if (!hasHydrated) return null
   return <Navigate to={isAuthenticated ? '/dashboard' : '/login'} replace />
 }
 
 export default function App() {
-  const { token, isAuthenticated, logout } = useAuthStore()
+  const { token, isAuthenticated, hasHydrated, logout } = useAuthStore()
 
-  // Clear stale persisted auth if there is no token stored
+  // Clear stale persisted auth if there is no token stored — only after hydration
   useEffect(() => {
-    if (isAuthenticated && !token) logout()
-  }, [])
+    if (hasHydrated && isAuthenticated && !token) logout()
+  }, [hasHydrated])
 
   return (
     <BrowserRouter>

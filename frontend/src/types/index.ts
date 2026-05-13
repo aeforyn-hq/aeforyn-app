@@ -10,7 +10,7 @@ export interface User {
   updated_at: string
 }
 
-export type PlanTier = 'free' | 'standard' | 'pro' | 'enterprise'
+export type PlanTier = 'free' | 'standard' | 'creator' | 'pro' | 'agency' | 'enterprise'
 
 export interface Subscription {
   id: string
