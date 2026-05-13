@@ -6,8 +6,10 @@ interface AuthState {
   user: User | null
   token: string | null
   isAuthenticated: boolean
+  avatarUrl: string | null
   setUser: (user: User | null) => void
   setToken: (token: string | null) => void
+  updateAvatar: (url: string | null) => void
   logout: () => void
 }
 
@@ -17,6 +19,7 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
+      avatarUrl: null,
       setUser: (user) => set({ user, isAuthenticated: !!user }),
       setToken: (token) => {
         if (token) {
@@ -26,14 +29,21 @@ export const useAuthStore = create<AuthState>()(
         }
         set({ token })
       },
+      updateAvatar: (url) => set({ avatarUrl: url }),
       logout: () => {
         localStorage.removeItem('aeforyn_token')
-        set({ user: null, token: null, isAuthenticated: false })
+        localStorage.removeItem('aeforyn-auth')
+        set({ user: null, token: null, isAuthenticated: false, avatarUrl: null })
       },
     }),
     {
       name: 'aeforyn-auth',
-      partialize: (state) => ({ token: state.token, user: state.user, isAuthenticated: state.isAuthenticated }),
+      partialize: (state) => ({
+        token: state.token,
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+        avatarUrl: state.avatarUrl,
+      }),
     }
   )
 )
