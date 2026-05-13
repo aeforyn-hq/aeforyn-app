@@ -7,6 +7,7 @@ interface AuthState {
   token: string | null
   isAuthenticated: boolean
   avatarUrl: string | null
+  hasHydrated: boolean
   setUser: (user: User | null) => void
   setToken: (token: string | null) => void
   updateAvatar: (url: string | null) => void
@@ -20,6 +21,7 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       isAuthenticated: false,
       avatarUrl: null,
+      hasHydrated: false,
       setUser: (user) => set({ user, isAuthenticated: !!user }),
       setToken: (token) => {
         if (token) {
@@ -44,6 +46,9 @@ export const useAuthStore = create<AuthState>()(
         isAuthenticated: state.isAuthenticated,
         avatarUrl: state.avatarUrl,
       }),
+      onRehydrateStorage: () => () => {
+        useAuthStore.setState({ hasHydrated: true })
+      },
     }
   )
 )
