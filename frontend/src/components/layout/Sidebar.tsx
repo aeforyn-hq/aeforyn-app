@@ -8,8 +8,6 @@ import {
 } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
 import { AeforynLogo } from '@/components/ui/AeforynLogo'
-import { PlanBadge } from '@/components/ui/Badge'
-import { AvatarOrInitials } from '@/components/layout/TopBar'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
@@ -35,7 +33,7 @@ const PRO_DESCRIPTIONS: Record<string, string> = {
 }
 
 export function Sidebar() {
-  const { user, logout, avatarUrl } = useAuthStore()
+  const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const [proTooltip, setProTooltip] = useState<string | null>(null)
 
@@ -45,12 +43,6 @@ export function Sidebar() {
     logout()
     navigate('/login')
   }
-
-  const handle = user?.creator_handle || ''
-  const parts = handle.replace('@', '').split(/[\s_-]/).filter(Boolean)
-  const initials = parts.length >= 2
-    ? (parts[0][0] + parts[1][0]).toUpperCase()
-    : (user?.email?.charAt(0) || 'A').toUpperCase()
 
   return (
     <aside
@@ -67,7 +59,7 @@ export function Sidebar() {
         {NAV_ITEMS.map(({ to, icon: Icon, label, proOnly, premium }) => {
           const isLocked = proOnly && !isPro
           return (
-            <div key={to} style={{ margin: '3px 8px' }}>
+            <div key={to} style={{ margin: '4px 8px' }}>
               <NavLink
                 to={to}
                 className={({ isActive }) =>
@@ -210,22 +202,6 @@ export function Sidebar() {
             <LogOut className="w-4 h-4 flex-shrink-0" />
             <span>Log out</span>
           </button>
-        </div>
-
-        {/* Bottom user row */}
-        <div className="px-4 py-3 border-t" style={{ borderColor: 'rgba(45,212,191,0.08)' }}>
-          <div
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-            style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.12)' }}
-          >
-            <AvatarOrInitials avatarUrl={avatarUrl} initials={initials} size={32} />
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium text-text-primary truncate">
-                {user?.creator_handle || user?.email?.split('@')[0] || 'Creator'}
-              </p>
-              <PlanBadge plan={user?.plan_tier || 'free'} className="mt-0.5" />
-            </div>
-          </div>
         </div>
       </div>
     </aside>

@@ -73,6 +73,36 @@ router.post('/forgot-password', async (req: Request, res: Response): Promise<voi
   res.json({ message: 'Password reset email sent' })
 })
 
+router.post('/change-password', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  const { current_password, new_password } = req.body
+  if (!current_password || !new_password) {
+    res.status(400).json({ error: 'current_password and new_password required' }); return
+  }
+  if (new_password.length < 8) {
+    res.status(400).json({ error: 'Password must be at least 8 characters' }); return
+  }
+
+  const { data: adminData } = await supabase.auth.admin.getUserById(req.userId!)
+  if (!adminData.user?.email) {
+    res.status(404).json({ error: 'User not found' }); return
+  }
+
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: adminData.user.email,
+    password: current_password,
+  })
+  if (verifyError) {
+    res.status(401).json({ error: 'Current password is incorrect' }); return
+  }
+
+  const { error } = await supabase.auth.admin.updateUserById(req.userId!, { password: new_password })
+  if (error) {
+    res.status(500).json({ error: error.message }); return
+  }
+
+  res.json({ message: 'Password updated successfully' })
+})
+
 router.get('/me', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { data, error } = await supabase
     .from('users')

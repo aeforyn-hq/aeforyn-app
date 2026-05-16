@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Bell, Settings, CreditCard, LogOut, ChevronDown, Shield, AlertTriangle, Info, CheckCheck } from 'lucide-react'
 import { useAuthStore } from '@/store/authStore'
+import { AvatarDisplay } from '@/components/ui/AvatarSVG'
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -50,15 +51,31 @@ const PLAN_LABELS: Record<string, string> = {
   free: 'Free', standard: 'Standard', creator: 'Creator', pro: 'Pro', agency: 'Agency', enterprise: 'Enterprise',
 }
 
-/** Shared avatar component — photo if avatarUrl set, else blue-teal initials square */
-export function AvatarOrInitials({ avatarUrl, initials, size = 36 }: { avatarUrl: string | null; initials: string; size?: number }) {
-  if (avatarUrl) {
+/** Shared avatar component — handles photo, illustrated, and initials */
+export function AvatarOrInitials({
+  avatarUrl, initials, size = 36,
+  avatarType = 'initials', illustratedAvatarId = 'a1',
+}: {
+  avatarUrl: string | null
+  initials: string
+  size?: number
+  avatarType?: 'initials' | 'illustrated' | 'photo'
+  illustratedAvatarId?: string
+}) {
+  if (avatarType === 'photo' && avatarUrl) {
     return (
       <img
         src={avatarUrl}
         alt="Profile"
         style={{ width: size, height: size, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }}
       />
+    )
+  }
+  if (avatarType === 'illustrated') {
+    return (
+      <div style={{ width: size, height: size, borderRadius: 8, overflow: 'hidden', flexShrink: 0 }}>
+        <AvatarDisplay id={illustratedAvatarId} size={size} />
+      </div>
     )
   }
   return (
@@ -86,7 +103,7 @@ export function AvatarOrInitials({ avatarUrl, initials, size = 36 }: { avatarUrl
 export function TopBar() {
   const { pathname } = useLocation()
   const navigate = useNavigate()
-  const { user, logout, avatarUrl } = useAuthStore()
+  const { user, logout, avatarUrl, avatarType, illustratedAvatarId } = useAuthStore()
   const title = PAGE_TITLES[pathname] || 'AEFORYN'
 
   const [notifOpen, setNotifOpen] = useState(false)
@@ -209,7 +226,7 @@ export function TopBar() {
             onClick={() => { setAvatarOpen((o) => !o); setNotifOpen(false) }}
             className="flex items-center gap-2 rounded-xl px-2 py-1 hover:bg-white/5 transition-all"
           >
-            <AvatarOrInitials avatarUrl={avatarUrl} initials={initials} size={36} />
+            <AvatarOrInitials avatarUrl={avatarUrl} initials={initials} size={36} avatarType={avatarType} illustratedAvatarId={illustratedAvatarId} />
             <ChevronDown className="w-3.5 h-3.5 text-text-secondary" />
           </button>
 
@@ -220,7 +237,7 @@ export function TopBar() {
             >
               {/* User info */}
               <div className="px-4 py-3 border-b flex items-center gap-3" style={{ borderColor: 'rgba(45,212,191,0.08)' }}>
-                <AvatarOrInitials avatarUrl={avatarUrl} initials={initials} size={40} />
+                <AvatarOrInitials avatarUrl={avatarUrl} initials={initials} size={40} avatarType={avatarType} illustratedAvatarId={illustratedAvatarId} />
                 <div className="min-w-0">
                   <p className="truncate" style={{ color: '#F0FDF4', fontSize: '13px', fontWeight: 600 }}>
                     {user?.creator_handle || user?.email}

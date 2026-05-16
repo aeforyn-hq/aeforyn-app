@@ -65,13 +65,18 @@ export function truncate(str: string, length: number): string {
 }
 
 export const PLAN_FEATURES: Record<string, string[]> = {
-  vault_upload: ['standard', 'pro', 'enterprise'],
-  unlimited_platforms: ['pro', 'enterprise'],
-  recovery_playbook: ['pro', 'enterprise'],
-  ai_assistant: ['standard', 'pro', 'enterprise'],
-  priority_support: ['pro', 'enterprise'],
-  multi_dashboard: ['enterprise'],
-  white_label: ['enterprise'],
+  vault_upload:             ['standard', 'creator', 'pro', 'agency', 'enterprise'],
+  unlimited_platforms:      ['pro', 'agency', 'enterprise'],
+  recovery_playbook:        ['standard', 'creator', 'pro', 'agency', 'enterprise'],
+  ai_assistant:             ['standard', 'creator', 'pro', 'agency', 'enterprise'],
+  damage_containment:       ['standard', 'creator', 'pro', 'agency', 'enterprise'],
+  proof_of_ownership:       ['pro', 'agency', 'enterprise'],
+  impersonation_monitoring: ['standard', 'creator', 'pro', 'agency', 'enterprise'],
+  impersonation_full:       ['pro', 'agency', 'enterprise'],
+  shared_access:            ['pro', 'agency', 'enterprise'],
+  priority_support:         ['pro', 'agency', 'enterprise'],
+  multi_dashboard:          ['agency', 'enterprise'],
+  white_label:              ['enterprise'],
 }
 
 export function hasFeature(planTier: string, feature: string): boolean {
