@@ -1,18 +1,71 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, Bot, User, Sparkles } from 'lucide-react'
+import {
+  Send, Bot, User, Sparkles, Lock, Shield, RefreshCw,
+  Download, CheckCircle, AlertTriangle, ScanLine, Flag,
+  Key, Eye, Smartphone,
+} from 'lucide-react'
 import { AeforynLogo } from '@/components/ui/AeforynLogo'
 import { api } from '@/lib/api'
 import { toast } from '@/store/toastStore'
 import { useAuthStore } from '@/store/authStore'
 import { hasFeature } from '@/lib/utils'
 import { Link } from 'react-router-dom'
-import { Lock } from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
 
 interface Message {
   role: 'user' | 'assistant'
   content: string
   timestamp: string
+}
+
+interface ActionCard {
+  icon: LucideIcon
+  title: string
+  body: string
+  cta?: { label: string; url: string }
+}
+
+interface ParsedResponse {
+  tldr: string
+  cards: ActionCard[]
+}
+
+const CARD_ICON_MAP: [RegExp, LucideIcon][] = [
+  [/2fa|two.factor|authenticat/i, Smartphone],
+  [/password|credential/i, Key],
+  [/recover|reset|restore/i, RefreshCw],
+  [/report|appeal|flag/i, Flag],
+  [/backup|download|export/i, Download],
+  [/check|review|audit|session|device/i, Eye],
+  [/scan|phish/i, ScanLine],
+  [/warn|alert|notify/i, AlertTriangle],
+  [/secure|lock|protect/i, Lock],
+  [/verify|confirm|complete/i, CheckCircle],
+]
+
+function iconForTitle(title: string): LucideIcon {
+  for (const [pattern, Icon] of CARD_ICON_MAP) {
+    if (pattern.test(title)) return Icon
+  }
+  return Shield
+}
+
+function parseResponse(content: string): ParsedResponse | null {
+  const tldrMatch = content.match(/^TL;?DR:?\s*(.+)$/im)
+  if (!tldrMatch) return null
+
+  const cardMatches = [...content.matchAll(/\*\*([^*\n]+)\*\*\n([^\n]+)(?:\nCTA:\s*([^→\n]+)\s*→\s*([^\n]+))?/g)]
+  if (cardMatches.length < 2) return null
+
+  const cards: ActionCard[] = cardMatches.slice(0, 4).map((m) => ({
+    icon: iconForTitle(m[1]),
+    title: m[1].trim(),
+    body: m[2].trim(),
+    cta: m[3] ? { label: m[3].trim(), url: m[4].trim() } : undefined,
+  }))
+
+  return { tldr: tldrMatch[1].trim(), cards }
 }
 
 const SUGGESTED_PROMPTS = [
@@ -87,18 +140,17 @@ export default function AIAssistant() {
       setMessages((prev) => [...prev, { role: 'assistant', content: fullContent, timestamp: new Date().toISOString() }])
       setStreamingContent('')
     } catch {
-      // Fallback demo response when API unavailable
       const demoResponse = getDemoResponse(text)
       let i = 0
       const interval = setInterval(() => {
-        i += 3
+        i += 5
         setStreamingContent(demoResponse.slice(0, i))
         if (i >= demoResponse.length) {
           clearInterval(interval)
           setMessages((prev) => [...prev, { role: 'assistant', content: demoResponse, timestamp: new Date().toISOString() }])
           setStreamingContent('')
         }
-      }, 20)
+      }, 15)
     } finally {
       setLoading(false)
     }
@@ -117,16 +169,14 @@ export default function AIAssistant() {
         </div>
         <h2 className="heading-section mb-3">AI Assistant — Standard Feature</h2>
         <p className="text-text-secondary mb-6">Upgrade to Standard or higher to access AEFORYN's AI security assistant.</p>
-        <Link to="/billing"><button className="btn-primary">Upgrade — from $29/month</button></Link>
+        <Link to="/billing"><button className="btn-primary">Upgrade — from R149/month</button></Link>
       </div>
     )
   }
 
   return (
     <div className="flex flex-col h-[calc(100vh-130px)] max-w-3xl mx-auto">
-      {/* Messages area */}
       <div className="flex-1 overflow-y-auto space-y-6 pb-4">
-        {/* Empty state */}
         {messages.length === 0 && !streamingContent && (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex flex-col items-center justify-center py-16 text-center">
             <AeforynLogo size="lg" showWordmark={false} />
@@ -148,7 +198,6 @@ export default function AIAssistant() {
           </motion.div>
         )}
 
-        {/* Message list */}
         <AnimatePresence>
           {messages.map((msg, i) => (
             <motion.div
@@ -158,7 +207,6 @@ export default function AIAssistant() {
               transition={{ duration: 0.3 }}
               className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
             >
-              {/* Avatar */}
               <div
                 className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
                 style={msg.role === 'user'
@@ -172,33 +220,27 @@ export default function AIAssistant() {
                 }
               </div>
 
-              {/* Bubble */}
-              <div
-                className="max-w-[85%] rounded-2xl px-5 py-4"
-                style={msg.role === 'user'
-                  ? { background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#071E1C' }
-                  : { background: '#0A2422', border: '1px solid rgba(45,212,191,0.12)', borderLeft: '3px solid rgba(45,212,191,0.4)' }
-                }
-              >
-                <p
-                  className={`text-sm leading-relaxed whitespace-pre-wrap ${msg.role === 'user' ? 'text-bg-primary font-medium' : 'text-text-primary'}`}
-                  style={{ fontFamily: 'Inter, sans-serif', fontSize: msg.role === 'assistant' ? '15px' : '14px', lineHeight: '1.7' }}
+              {msg.role === 'user' ? (
+                <div
+                  className="max-w-[85%] rounded-2xl px-5 py-4"
+                  style={{ background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#071E1C' }}
                 >
-                  {msg.content}
-                </p>
-              </div>
+                  <p className="text-sm font-medium leading-relaxed">{msg.content}</p>
+                </div>
+              ) : (
+                <AssistantBubble content={msg.content} />
+              )}
             </motion.div>
           ))}
         </AnimatePresence>
 
-        {/* Streaming message */}
         {(streamingContent || loading) && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="flex gap-3">
             <div className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1"
               style={{ background: 'rgba(45,212,191,0.1)', border: '1px solid rgba(45,212,191,0.2)' }}>
               <Bot className="w-4 h-4 text-teal" />
             </div>
-            <div className="max-w-[85%] rounded-2xl px-5 py-4"
+            <div className="flex-1 max-w-[85%] rounded-2xl px-5 py-4"
               style={{ background: '#0A2422', border: '1px solid rgba(45,212,191,0.12)', borderLeft: '3px solid rgba(45,212,191,0.4)' }}>
               {streamingContent ? (
                 <p className="text-sm text-text-primary leading-relaxed whitespace-pre-wrap"
@@ -209,9 +251,9 @@ export default function AIAssistant() {
               ) : (
                 <div className="flex items-center gap-3">
                   <div className="flex gap-1.5">
-                    {[0, 1, 2].map((i) => (
-                      <motion.div key={i} className="w-2 h-2 rounded-full bg-teal"
-                        animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: i * 0.3 }} />
+                    {[0, 1, 2].map((j) => (
+                      <motion.div key={j} className="w-2 h-2 rounded-full bg-teal"
+                        animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: j * 0.3 }} />
                     ))}
                   </div>
                   <span className="text-xs mono-text text-teal tracking-widest" style={{ letterSpacing: '2px' }}>AEFORYN is thinking...</span>
@@ -224,7 +266,6 @@ export default function AIAssistant() {
         <div ref={bottomRef} />
       </div>
 
-      {/* Input bar */}
       <div className="flex-shrink-0 pt-4" style={{ borderTop: '1px solid rgba(45,212,191,0.08)' }}>
         <div className="flex items-end gap-3 p-4 rounded-2xl"
           style={{ background: '#0A2422', border: '1px solid rgba(45,212,191,0.15)' }}>
@@ -258,16 +299,168 @@ export default function AIAssistant() {
   )
 }
 
+function AssistantBubble({ content }: { content: string }) {
+  const parsed = parseResponse(content)
+
+  if (!parsed) {
+    return (
+      <div
+        className="max-w-[85%] rounded-2xl px-5 py-4"
+        style={{ background: '#0A2422', border: '1px solid rgba(45,212,191,0.12)', borderLeft: '3px solid rgba(45,212,191,0.4)' }}
+      >
+        <p className="text-sm text-text-primary leading-relaxed whitespace-pre-wrap"
+          style={{ fontFamily: 'Inter, sans-serif', fontSize: '15px', lineHeight: '1.7' }}>
+          {content}
+        </p>
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex-1" style={{ maxWidth: 680 }}>
+      {/* TL;DR */}
+      <div
+        className="mb-3 px-4 py-3 rounded-xl"
+        style={{ background: 'rgba(45,212,191,0.06)', border: '1px solid rgba(45,212,191,0.15)', borderLeft: '3px solid #2DD4BF' }}
+      >
+        <p className="text-sm font-semibold" style={{ color: '#F0FDF4', lineHeight: 1.5 }}>
+          <span style={{ color: '#2DD4BF', marginRight: 8 }}>TL;DR</span>
+          {parsed.tldr}
+        </p>
+      </div>
+
+      {/* Action cards */}
+      <div className="flex flex-col" style={{ gap: 12 }}>
+        {parsed.cards.map((card, i) => {
+          const Icon = card.icon
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25, delay: i * 0.07 }}
+              style={{
+                background: '#0A2422',
+                border: '1px solid rgba(45,212,191,0.1)',
+                borderRadius: 12,
+                padding: 16,
+              }}
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  className="flex-shrink-0 w-8 h-8 rounded-lg flex items-center justify-center mt-0.5"
+                  style={{ background: 'rgba(45,212,191,0.1)' }}
+                >
+                  <Icon className="w-4 h-4" style={{ color: '#2DD4BF' }} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold mb-1" style={{ color: '#F0FDF4' }}>{card.title}</p>
+                  <p className="text-sm" style={{ color: '#86EFAC', lineHeight: 1.55 }}>{card.body}</p>
+                  {card.cta && (
+                    <a
+                      href={card.cta.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 mt-2 text-xs font-semibold transition-opacity hover:opacity-80"
+                      style={{ color: '#2DD4BF' }}
+                    >
+                      {card.cta.label} →
+                    </a>
+                  )}
+                </div>
+              </div>
+            </motion.div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 function getDemoResponse(question: string): string {
   const q = question.toLowerCase()
+
   if (q.includes('2fa') || q.includes('two-factor')) {
-    return `Great question! Two-factor authentication (2FA) is one of the most important things you can do to protect your accounts.\n\nFor Instagram specifically:\n1. Go to your profile and tap the hamburger menu (≡)\n2. Tap Settings → Security → Two-Factor Authentication\n3. Tap "Get Started"\n4. Choose "Authentication App" — this is much more secure than SMS\n5. Download Google Authenticator or Authy if you don't have it\n6. Scan the QR code Instagram shows you\n7. **Save your backup codes** somewhere safe — I'd recommend uploading them to your AEFORYN vault\n\nThe authenticator app method can't be SIM-swapped, which is a real risk for creators with public phone numbers. Do this for all your platforms — not just Instagram.`
+    return `TL;DR: Enable an authenticator app (not SMS) on every platform — this is the single highest-impact security action you can take.
+
+**Enable an Authenticator App**
+Download Google Authenticator or Authy, then link it to your account via the Security settings — it can't be SIM-swapped.
+
+**Set Up 2FA on Instagram**
+Profile → Settings → Security → Two-Factor Authentication → Authentication App, then scan the QR code.
+CTA: Instagram 2FA Guide → https://help.instagram.com/566810106808145
+
+**Save Your Backup Codes**
+Every platform gives you one-time backup codes when you enable 2FA — store them in your AEFORYN vault now.
+
+**Enable 2FA on Every Platform**
+Repeat for TikTok, YouTube, Twitter/X, and any email account linked to your creator profiles.`
   }
-  if (q.includes('phishing') || q.includes('scam')) {
-    return `Phishing emails targeting creators usually have a few telltale signs:\n\n🚩 **Urgency** — "Your account will be deleted in 24 hours!" Real platforms give you weeks to respond.\n\n🚩 **Suspicious domains** — The email comes from youtube-creator-support.net instead of youtube.com. Always check the full domain.\n\n🚩 **Requests for your login** — No legitimate company will ever ask for your password or ask you to "verify" by logging in through a link they send you.\n\n🚩 **Too-good-to-be-true offers** — "$5,000 brand deal, reply today!" Legitimate brands don't work like this.\n\nIf you get something suspicious, you can paste it into the AEFORYN Scanner and we'll analyse it with AI in seconds.`
+
+  if (q.includes('phishing') || q.includes('scam') || q.includes('suspicious')) {
+    return `TL;DR: Never click links from unexpected emails — verify through the platform's official app or website directly.
+
+**Check the Sender Domain**
+Hover over the sender's email address — legitimate platforms only send from their own domains (e.g. @youtube.com, not @youtube-creator.net).
+
+**Spot Urgency and Pressure Tactics**
+Real platforms give you weeks to respond — any email saying "your account will be deleted in 24 hours" is almost always a scam.
+
+**Scan It With AEFORYN**
+Paste the suspicious message or URL into the AEFORYN Scanner for an instant AI risk assessment.
+CTA: Open Scanner → /scanner
+
+**Never Enter Credentials via Email Links**
+No legitimate company will ask you to log in through a link they send you — always navigate directly to the platform.`
   }
-  if (q.includes('another country') || q.includes('unrecognised login')) {
-    return `That's urgent — act immediately.\n\n**Right now:**\n1. Change your password for that account immediately (don't wait)\n2. Go to the account's "Login Activity" or "Active Sessions" section and log out every session except the one you're currently in\n3. Enable 2FA if it's not already on — use an authenticator app\n\n**Then check:**\n- Did they change your recovery email or phone number? Update it back.\n- Were any posts made or settings changed? Revert them.\n- Check connected apps — remove anything suspicious.\n\nIf you can't log in at all, that means they've already changed your password. Use the account's official recovery page (e.g., instagram.com/hacked) — never use third-party recovery services.\n\nWant me to walk you through the full recovery process for a specific platform?`
+
+  if (q.includes('hacked') || q.includes('compromised') || q.includes('someone else')) {
+    return `TL;DR: Change your password immediately, revoke all active sessions, then enable 2FA with an authenticator app.
+
+**Change Your Password Right Now**
+Do this on a trusted device — go directly to the platform's security settings and set a new strong password.
+
+**Revoke All Active Sessions**
+Find "Login Activity" or "Devices" in Security settings and log out every session you don't recognise.
+
+**Secure Your Linked Email First**
+Your email is the master key — if it's compromised, the attacker can reset any account linked to it.
+
+**Use the Official Recovery Portal**
+Use the platform's own recovery page — never pay third-party services claiming to recover your account.
+CTA: Instagram Hacked Portal → https://www.instagram.com/hacked`
   }
-  return `Good question! Here's what you need to know:\n\nFor creators who depend on their social accounts for income, security isn't optional — it's as important as your content strategy.\n\nThe most important things you can do right now:\n\n1. **Use a password manager** — 1Password and Bitwarden are both excellent. They generate and store unique passwords for every account, so one breach can't expose everything.\n\n2. **Enable 2FA everywhere** — Use an authenticator app (not SMS) for all your platforms.\n\n3. **Back up your content** — Your AEFORYN vault is encrypted and secure. Upload your most important content regularly.\n\n4. **Scan suspicious messages** — If you get a suspicious DM or email, paste it into the AEFORYN Scanner before acting on it.\n\nIs there a specific platform or situation you'd like more detail on?`
+
+  if (q.includes('impersonat')) {
+    return `TL;DR: Document the fake account, report it directly on the platform, and warn your audience immediately.
+
+**Document Everything First**
+Screenshot the fake account's profile, bio, posts, and follower count before reporting — platforms may act quickly.
+
+**Report via the Platform's Own Tool**
+Visit the fake profile → three-dot menu → Report → Impersonation → "Me" — this is the fastest path to takedown.
+
+**Alert Your Audience Now**
+Post a Story and pinned post warning followers about the fake account before they get scammed.
+
+**Apply for Verification**
+A verified badge makes impersonation significantly harder and faster to resolve in future incidents.
+CTA: Instagram Verification → https://help.instagram.com/854227311295302`
+  }
+
+  return `TL;DR: The most impactful things you can do right now are: a password manager, authenticator-based 2FA, and regular content backups.
+
+**Use a Password Manager**
+1Password or Bitwarden generate and store unique passwords per account — one breach can't expose everything else.
+
+**Enable 2FA Everywhere**
+Use an authenticator app (not SMS) on every platform linked to your creator income.
+
+**Back Up Your Content**
+Upload your most important content to your encrypted AEFORYN vault regularly — lost posts are often unrecoverable.
+CTA: Open Vault → /vault
+
+**Scan Suspicious Messages**
+If you receive a suspicious DM or brand deal email, paste it into the AEFORYN Scanner before acting on it.
+CTA: Open Scanner → /scanner`
 }
