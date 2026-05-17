@@ -120,35 +120,70 @@ export default function PhishingScanner() {
             exit={{ opacity: 0, scale: 0.95 }}
             className="card-static text-center py-10"
           >
-            <div className="w-24 h-24 mx-auto mb-5 relative flex items-center justify-center">
-              {/* Outer pulse ring */}
+            <style>{`
+              @keyframes aeforyn-spin {
+                from { transform: rotate(0deg); }
+                to   { transform: rotate(360deg); }
+              }
+              .hex-top { transform-box: fill-box; transform-origin: center; animation: aeforyn-spin 8s linear infinite; }
+              .hex-bl  { transform-box: fill-box; transform-origin: center; animation: aeforyn-spin 5s linear infinite; }
+              .hex-br  { transform-box: fill-box; transform-origin: center; animation: aeforyn-spin 3s linear infinite; }
+            `}</style>
+            <div className="w-32 h-32 mx-auto mb-5 relative flex items-center justify-center">
+              {/* Outer glow — radiates gold, intensifies when scanning */}
               <motion.div
-                className="absolute inset-0 rounded-full"
-                style={{ background: 'rgba(245,158,11,0.12)' }}
-                animate={{ scale: [1, 1.5, 1], opacity: [0.6, 0, 0.6] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeOut' }}
-              />
-              {/* Mid pulse ring */}
-              <motion.div
-                className="absolute inset-2 rounded-full"
-                style={{ background: 'rgba(245,158,11,0.1)' }}
-                animate={{ scale: [1, 1.3, 1], opacity: [0.5, 0, 0.5] }}
-                transition={{ duration: 2, repeat: Infinity, ease: 'easeOut', delay: 0.4 }}
-              />
-              {/* Shield container */}
-              <motion.div
-                className="relative w-16 h-16 rounded-full flex items-center justify-center z-10"
-                style={{ background: 'rgba(245,158,11,0.1)', border: '2px solid rgba(245,158,11,0.5)' }}
-                animate={{ boxShadow: ['0 0 12px rgba(245,158,11,0.3)', '0 0 32px rgba(245,158,11,0.65)', '0 0 12px rgba(245,158,11,0.3)'] }}
+                className="absolute inset-0 rounded-full pointer-events-none"
+                style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.28) 0%, transparent 70%)' }}
+                animate={{ opacity: [0.5, 1, 0.5], scale: [0.8, 1.3, 0.8] }}
                 transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut' }}
-              >
-                <motion.div
-                  animate={{ scale: [1, 1.08, 1], rotate: [0, 3, -3, 0] }}
-                  transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                  <Shield className="w-8 h-8" style={{ color: '#F59E0B', filter: 'drop-shadow(0 0 6px rgba(245,158,11,0.7))' }} />
-                </motion.div>
-              </motion.div>
+              />
+              {/* Mid glow */}
+              <motion.div
+                className="absolute inset-4 rounded-full pointer-events-none"
+                style={{ background: 'radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%)' }}
+                animate={{ opacity: [0.3, 0.8, 0.3] }}
+                transition={{ duration: 1.6, repeat: Infinity, ease: 'easeInOut', delay: 0.5 }}
+              />
+              {/* AEFORYN hex cluster */}
+              <svg viewBox="0 0 48 48" width="108" height="108" className="relative z-10" style={{ filter: 'drop-shadow(0 0 8px rgba(245,158,11,0.7))' }}>
+                <defs>
+                  <linearGradient id="hgGold1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#F5D78E" />
+                    <stop offset="45%" stopColor="#F59E0B" />
+                    <stop offset="100%" stopColor="#B45309" />
+                  </linearGradient>
+                  <linearGradient id="hgGold2" x1="100%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" stopColor="#FDE68A" />
+                    <stop offset="50%" stopColor="#F59E0B" />
+                    <stop offset="100%" stopColor="#92400E" />
+                  </linearGradient>
+                  <linearGradient id="hgGold3" x1="50%" y1="0%" x2="50%" y2="100%">
+                    <stop offset="0%" stopColor="#F5D78E" />
+                    <stop offset="100%" stopColor="#B45309" />
+                  </linearGradient>
+                </defs>
+
+                {/* Top hex — slowest (8s), center (24,14) */}
+                <g className="hex-top">
+                  <polygon points="24,6 31,10 31,18 24,22 17,18 17,10" fill="url(#hgGold1)" stroke="#F59E0B" strokeWidth="0.5" />
+                  <polygon points="24,8 29.5,11 29.5,17 24,20 18.5,17 18.5,11" fill="#071E1C" opacity="0.22" />
+                </g>
+
+                {/* Bottom-left hex — medium (5s), center (16,30) */}
+                <g className="hex-bl">
+                  <polygon points="16,22 23,26 23,34 16,38 9,34 9,26" fill="url(#hgGold2)" stroke="#F59E0B" strokeWidth="0.5" />
+                  <polygon points="16,24 21.5,27 21.5,33 16,36 10.5,33 10.5,27" fill="#071E1C" opacity="0.22" />
+                </g>
+
+                {/* Bottom-right hex — fastest (3s), center (32,30) */}
+                <g className="hex-br">
+                  <polygon points="32,22 39,26 39,34 32,38 25,34 25,26" fill="url(#hgGold3)" stroke="#F59E0B" strokeWidth="0.5" />
+                  <polygon points="32,24 37.5,27 37.5,33 32,36 26.5,33 26.5,27" fill="#071E1C" opacity="0.22" />
+                </g>
+
+                {/* Centre dot */}
+                <circle cx="24" cy="26" r="1.5" fill="#F5D78E" opacity="0.85" />
+              </svg>
             </div>
             <p className="mono-text text-sm tracking-widest" style={{ letterSpacing: '3px', color: '#F59E0B' }}>SCANNING FOR THREATS...</p>
             <div className="flex items-center justify-center gap-2 mt-3">

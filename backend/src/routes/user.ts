@@ -53,6 +53,39 @@ router.delete('/', requireAuth, async (req: AuthRequest, res: Response): Promise
   res.json({ message: 'Account and all data permanently deleted' })
 })
 
+router.patch('/password', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
+  const { current_password, new_password } = req.body
+  if (!current_password || !new_password) {
+    res.status(400).json({ error: 'current_password and new_password are required' })
+    return
+  }
+  if (new_password.length < 8) {
+    res.status(400).json({ error: 'New password must be at least 8 characters' })
+    return
+  }
+
+  // Verify current password by attempting sign-in with it
+  const { error: verifyError } = await supabase.auth.signInWithPassword({
+    email: req.userEmail!,
+    password: current_password,
+  })
+  if (verifyError) {
+    res.status(401).json({ error: 'Current password is incorrect' })
+    return
+  }
+
+  // Update password in Supabase Auth
+  const { error: updateError } = await supabase.auth.admin.updateUserById(req.userId!, {
+    password: new_password,
+  })
+  if (updateError) {
+    res.status(500).json({ error: updateError.message })
+    return
+  }
+
+  res.json({ message: 'Password updated successfully' })
+})
+
 router.patch('/profile', requireAuth, async (req: AuthRequest, res: Response): Promise<void> => {
   const { creator_handle } = req.body
   const { data, error } = await supabase

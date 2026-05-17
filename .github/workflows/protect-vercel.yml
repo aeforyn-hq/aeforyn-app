@@ -1,0 +1,19 @@
+name: Protect vercel.json
+on:
+  push:
+    branches: [main]
+jobs:
+  protect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Check and fix vercel.json
+        run: |
+          CORRECT='{"rewrites":[{"source":"/(.*)","destination":"/index.html"}]}'
+          echo $CORRECT > vercel.json
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+          git add vercel.json
+          git diff --staged --quiet || git commit -m "auto: restore vercel.json" && git push
