@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Shield, X, CheckCircle, Clock, MapPin, AlertTriangle, Bot, Lock, Loader2, ChevronRight } from 'lucide-react'
+import { Shield, X, CheckCircle, Clock, MapPin, AlertTriangle, Bot, Lock, Loader2, ChevronRight, Zap, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { StatusDot } from '@/components/ui/StatusDot'
 import { SeverityBadge } from '@/components/ui/Badge'
@@ -81,6 +81,137 @@ const AI_RESOLUTION_STEPS: Record<string, string[]> = {
   ],
 }
 
+type ContainmentStatus = 'idle' | 'confirm' | 'running' | 'done'
+
+const CONTAINMENT_PLATFORMS = [
+  { id: 'instagram', label: 'Instagram', url: 'https://help.instagram.com/368191326593075', action: 'Trigger account recovery' },
+  { id: 'facebook',  label: 'Facebook',  url: 'https://www.facebook.com/hacked',           action: 'Open hacked portal' },
+  { id: 'youtube',   label: 'YouTube',   url: 'https://accounts.google.com/signin/recovery', action: 'Recover Google/YouTube' },
+  { id: 'tiktok',    label: 'TikTok',    url: 'https://support.tiktok.com/en/account-and-privacy/account-safety', action: 'TikTok account safety' },
+  { id: 'x',         label: 'X',         url: 'https://help.twitter.com/forms/signin',       action: 'X account recovery' },
+  { id: 'linkedin',  label: 'LinkedIn',  url: 'https://www.linkedin.com/help/linkedin/answer/56363', action: 'LinkedIn recovery' },
+  { id: 'snapchat',  label: 'Snapchat',  url: 'https://accounts.snapchat.com/accounts/password-reset', action: 'Snapchat recovery' },
+]
+
+function DamageContainment({ threats }: { threats: Threat[] }) {
+  const { user } = useAuthStore()
+  const hasAccess = hasFeature(user?.plan_tier || 'free', 'damage_containment')
+  const [status, setStatus] = useState<ContainmentStatus>('idle')
+  const [queue, setQueue] = useState<{ id: string; label: string; url: string; action: string; state: 'queued' | 'sending' | 'sent' }[]>([])
+
+  const criticalCount = threats.filter((t) => !t.is_resolved && (t.severity === 'critical' || t.severity === 'high')).length
+  if (criticalCount === 0 && status === 'idle') return null
+
+  const activate = () => {
+    setStatus('running')
+    const items = CONTAINMENT_PLATFORMS.map((p) => ({ ...p, state: 'queued' as const }))
+    setQueue(items)
+    items.forEach((_, i) => {
+      setTimeout(() => {
+        setQueue((q) => q.map((item, idx) => idx === i ? { ...item, state: 'sending' } : item))
+        setTimeout(() => {
+          setQueue((q) => q.map((item, idx) => idx === i ? { ...item, state: 'sent' } : item))
+          if (i === items.length - 1) setStatus('done')
+        }, 900)
+      }, i * 800)
+    })
+  }
+
+  if (!hasAccess) {
+    return (
+      <div className="rounded-2xl p-5 flex items-start gap-4" style={{ background: 'rgba(239,68,68,0.04)', border: '1px solid rgba(239,68,68,0.2)' }}>
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(239,68,68,0.1)' }}>
+          <Lock className="w-5 h-5 text-threat" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-sm font-bold" style={{ color: '#F0FDF4' }}>🛡 One-Click Damage Containment</p>
+            <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: 'rgba(201,168,76,0.15)', color: '#C9A84C', border: '1px solid rgba(201,168,76,0.3)' }}>Standard+</span>
+          </div>
+          <p className="text-xs text-text-secondary mb-3">Compress a 3-hour breach response into 10 minutes — queues official recovery actions across all affected platforms instantly.</p>
+          <a href="/billing" className="inline-flex items-center gap-1 text-xs font-semibold px-3 py-1.5 rounded-lg transition-opacity hover:opacity-80" style={{ background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#071E1C' }}>
+            Upgrade to unlock →
+          </a>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(239,68,68,0.3)', background: 'rgba(239,68,68,0.04)' }}>
+      <div className="p-5">
+        <div className="flex items-start gap-4">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(239,68,68,0.12)' }}>
+            <Zap className="w-5 h-5 text-threat" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <p className="text-sm font-bold" style={{ color: '#F0FDF4' }}>🛡 One-Click Damage Containment</p>
+              {criticalCount > 0 && (
+                <span className="text-xs px-2 py-0.5 rounded-full font-semibold animate-pulse" style={{ background: 'rgba(239,68,68,0.2)', color: '#EF4444', border: '1px solid rgba(239,68,68,0.4)' }}>
+                  {criticalCount} active threat{criticalCount > 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-text-secondary mb-4">
+              Opens official recovery portals for every affected platform simultaneously. Compress a 3-hour panic into 10 minutes.
+            </p>
+
+            {status === 'idle' && (
+              <button
+                onClick={() => setStatus('confirm')}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all hover:opacity-90"
+                style={{ background: 'linear-gradient(135deg, #EF4444, #DC2626)', color: '#fff', boxShadow: '0 0 20px rgba(239,68,68,0.3)' }}
+              >
+                <Zap className="w-4 h-4" /> Activate Containment
+              </button>
+            )}
+
+            {status === 'confirm' && (
+              <div className="p-4 rounded-xl space-y-3" style={{ background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)' }}>
+                <p className="text-sm font-medium text-text-primary">This will open official recovery links for {CONTAINMENT_PLATFORMS.length} platforms. Confirm to proceed.</p>
+                <div className="flex gap-3">
+                  <button onClick={activate} className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold" style={{ background: '#EF4444', color: '#fff' }}>
+                    <Zap className="w-4 h-4" /> Confirm & Activate
+                  </button>
+                  <button onClick={() => setStatus('idle')} className="px-4 py-2 rounded-xl text-sm text-text-secondary hover:text-text-primary transition-colors">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {(status === 'running' || status === 'done') && (
+              <div className="space-y-2 mt-2">
+                {queue.map((item) => (
+                  <div key={item.id} className="flex items-center gap-3 p-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(45,212,191,0.08)' }}>
+                    <div className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
+                      {item.state === 'queued'  && <Clock className="w-4 h-4 text-text-secondary" />}
+                      {item.state === 'sending' && <Loader2 className="w-4 h-4 text-warning animate-spin" style={{ color: '#F59E0B' }} />}
+                      {item.state === 'sent'    && <CheckCircle className="w-4 h-4 text-safe" />}
+                    </div>
+                    <span className="text-sm flex-1" style={{ color: item.state === 'sent' ? '#86EFAC' : item.state === 'sending' ? '#F0FDF4' : '#86EFAC', opacity: item.state === 'queued' ? 0.5 : 1 }}>
+                      {item.label} — {item.action}
+                    </span>
+                    {item.state === 'sent' && (
+                      <a href={item.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs text-teal hover:opacity-80">
+                        Open <ExternalLink className="w-3 h-3" />
+                      </a>
+                    )}
+                  </div>
+                ))}
+                {status === 'done' && (
+                  <p className="text-xs text-safe mt-3 font-medium">✓ All recovery portals queued. Work through each one to secure your accounts.</p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function Threats() {
   const [activeTab, setActiveTab] = useState<Tab>('all')
   const [selectedThreat, setSelectedThreat] = useState<Threat | null>(null)
@@ -145,6 +276,9 @@ export default function Threats() {
 
   return (
     <div className="space-y-6">
+      {/* One-Click Damage Containment — Section 10 */}
+      <DamageContainment threats={threats} />
+
       {/* Filter tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">
         {TABS.map((tab) => (

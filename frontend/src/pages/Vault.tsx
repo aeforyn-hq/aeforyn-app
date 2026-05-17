@@ -2,11 +2,13 @@
 import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
-import { HardDrive, Upload, Download, Trash2, Lock, FileVideo, FileImage, FileText, Key, File } from 'lucide-react'
+import { HardDrive, Upload, Download, Trash2, Lock, FileVideo, FileImage, FileText, Key, File, ShieldCheck, ChevronDown } from 'lucide-react'
+import { hasFeature } from '@/lib/utils'
 import { Button } from '@/components/ui/Button'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { api } from '@/lib/api'
 import { formatBytes, timeAgo, cn } from '@/lib/utils'
+import { Link } from 'react-router-dom'
 import { toast } from '@/store/toastStore'
 import { useAuthStore } from '@/store/authStore'
 import type { VaultFile } from '@/types'
@@ -38,6 +40,174 @@ const FILE_ICONS: Record<string, React.FC<{ className?: string; style?: React.CS
 
 const CATEGORY_COLORS: Record<string, string> = {
   video: '#2DD4BF', image: '#C9A84C', document: '#86EFAC', credential: '#F59E0B', other: '#9CA3AF', general: '#9CA3AF',
+}
+
+// ---------------------------------------------------------------------------
+// Proof of Ownership Package — Section 11
+// ---------------------------------------------------------------------------
+
+const POO_CATEGORIES = [
+  {
+    id: 'platform_ownership',
+    label: 'Platform Ownership',
+    description: 'Screenshots showing you are the original account creator — profile creation date, original email confirmation, admin dashboard.',
+    examples: ['Account creation email', 'Original profile screenshots', 'Admin/Creator Studio screenshots'],
+    icon: ShieldCheck,
+  },
+  {
+    id: 'content_proof',
+    label: 'Content Proof',
+    description: 'Evidence that the content is yours — watermarked originals, raw files, early drafts, posting timestamps.',
+    examples: ['Original video files / RAW images', 'Canva or editing project exports', 'Scheduled post confirmations'],
+    icon: FileText,
+  },
+  {
+    id: 'brand_identity',
+    label: 'Brand Identity',
+    description: 'Proof of your brand: logo files, trademark registration, brand kit, signed contracts.',
+    examples: ['Logo source files (AI, SVG, PSD)', 'Trademark/registration documents', 'Brand usage agreements'],
+    icon: Key,
+  },
+  {
+    id: 'identity_documents',
+    label: 'Identity Documents',
+    description: 'Link your real identity to your creator accounts — ID, selfie with ID, notarised ownership letters.',
+    examples: ['Government-issued ID (redacted)', 'Selfie holding ID + account username', 'Notarised ownership letter'],
+    icon: File,
+  },
+]
+
+function ProofOfOwnership() {
+  const { user } = useAuthStore()
+  const isPro = hasFeature(user?.plan_tier || 'free', 'proof_of_ownership')
+  const isStandard = hasFeature(user?.plan_tier || 'free', 'vault_upload')
+  const [open, setOpen] = useState(false)
+  const [uploadingCat, setUploadingCat] = useState<string | null>(null)
+  const fileRefs = useRef<Record<string, HTMLInputElement | null>>({})
+  const queryClient = useQueryClient()
+
+  const handleProofUpload = async (categoryId: string, file: File) => {
+    setUploadingCat(categoryId)
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+      formData.append('category', 'document')
+      formData.append('proof_category', categoryId)
+      formData.append('vault_path', `proof-of-ownership/${user?.id}/${categoryId}/`)
+      await api.post('/api/vault/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } })
+      queryClient.invalidateQueries({ queryKey: ['vault-files'] })
+      toast.success(`${file.name} uploaded to ${categoryId.replace(/_/g, ' ')}`)
+    } catch {
+      toast.error('Upload failed — try again')
+    } finally {
+      setUploadingCat(null)
+    }
+  }
+
+  return (
+    <div className="rounded-2xl overflow-hidden" style={{ border: '1px solid rgba(45,212,191,0.15)' }}>
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="w-full flex items-center justify-between p-5 transition-colors hover:bg-white/3"
+        style={{ background: 'rgba(45,212,191,0.03)' }}
+      >
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: 'rgba(45,212,191,0.1)' }}>
+            <ShieldCheck className="w-5 h-5 text-teal" />
+          </div>
+          <div className="text-left">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-bold text-text-primary">Proof of Ownership Package</p>
+              <span className="text-xs px-2 py-0.5 rounded-full font-semibold" style={{ background: isPro ? 'rgba(45,212,191,0.15)' : 'rgba(201,168,76,0.15)', color: isPro ? '#2DD4BF' : '#C9A84C', border: `1px solid ${isPro ? 'rgba(45,212,191,0.3)' : 'rgba(201,168,76,0.3)'}` }}>
+                {isPro ? 'Pro' : 'Pro only'}
+              </span>
+            </div>
+            <p className="text-xs text-text-secondary mt-0.5">Upload ownership docs for all your platforms — your legal protection if accounts are stolen.</p>
+          </div>
+        </div>
+        <ChevronDown className={`w-4 h-4 text-text-secondary transition-transform ${open ? 'rotate-180' : ''}`} />
+      </button>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+            <div className="p-5 pt-0 space-y-4" style={{ borderTop: '1px solid rgba(45,212,191,0.08)' }}>
+
+              {!isPro ? (
+                <div className="py-6 text-center">
+                  {isStandard ? (
+                    <>
+                      <Lock className="w-10 h-10 text-gold mx-auto mb-3" />
+                      <p className="text-sm font-semibold text-text-primary mb-1">Proof of Ownership is a Pro feature</p>
+                      <p className="text-xs text-text-secondary mb-4 max-w-sm mx-auto">Upload and store legally-admissible ownership documents for every platform you create on. Available from Pro.</p>
+                      <Link to="/billing" className="inline-flex items-center gap-1 text-sm font-semibold px-4 py-2 rounded-xl" style={{ background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#071E1C' }}>
+                        Upgrade to Pro →
+                      </Link>
+                    </>
+                  ) : (
+                    <>
+                      <Lock className="w-10 h-10 text-gold mx-auto mb-3" />
+                      <p className="text-sm font-semibold text-text-primary mb-1">Available on Standard and above</p>
+                      <Link to="/billing" className="inline-flex items-center gap-1 text-sm font-semibold px-4 py-2 rounded-xl" style={{ background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#071E1C' }}>
+                        Upgrade →
+                      </Link>
+                    </>
+                  )}
+                </div>
+              ) : (
+                <>
+                  <div className="p-4 rounded-xl" style={{ background: 'rgba(45,212,191,0.05)', border: '1px solid rgba(45,212,191,0.15)' }}>
+                    <p className="text-xs text-teal font-semibold mb-1">Why this matters</p>
+                    <p className="text-xs text-text-secondary leading-relaxed">If your account is stolen or wrongfully suspended, platforms require proof you are the original owner. These documents are your legal backup — stored encrypted in your vault and ready when you need them.</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-4">
+                    {POO_CATEGORIES.map(({ id, label, description, examples, icon: Icon }) => (
+                      <div key={id} className="p-4 rounded-xl" style={{ background: '#0A2422', border: '1px solid rgba(45,212,191,0.1)' }}>
+                        <div className="flex items-start gap-3 mb-3">
+                          <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: 'rgba(45,212,191,0.1)' }}>
+                            <Icon className="w-4 h-4 text-teal" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-semibold text-text-primary">{label}</p>
+                            <p className="text-xs text-text-secondary mt-0.5 leading-relaxed">{description}</p>
+                          </div>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 mb-3">
+                          {examples.map((ex) => (
+                            <span key={ex} className="text-xs px-2 py-1 rounded-lg" style={{ background: 'rgba(134,239,172,0.06)', color: '#86EFAC', border: '1px solid rgba(134,239,172,0.12)' }}>{ex}</span>
+                          ))}
+                        </div>
+                        <input
+                          type="file"
+                          ref={(el) => { fileRefs.current[id] = el }}
+                          className="hidden"
+                          accept=".pdf,.jpg,.jpeg,.png,.zip,.doc,.docx"
+                          onChange={(e) => { const f = e.target.files?.[0]; if (f) handleProofUpload(id, f) }}
+                        />
+                        <button
+                          onClick={() => fileRefs.current[id]?.click()}
+                          disabled={uploadingCat === id}
+                          className="flex items-center gap-2 text-xs px-3 py-2 rounded-lg transition-all hover:opacity-80"
+                          style={{ background: 'rgba(45,212,191,0.1)', color: '#2DD4BF', border: '1px solid rgba(45,212,191,0.2)' }}
+                        >
+                          {uploadingCat === id ? (
+                            <><div className="w-3 h-3 border border-teal border-t-transparent rounded-full animate-spin" /> Uploading...</>
+                          ) : (
+                            <><Upload className="w-3.5 h-3.5" /> Upload to {label}</>
+                          )}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
 }
 
 export default function Vault() {
@@ -165,6 +335,9 @@ export default function Vault() {
           <Lock className="w-3 h-3" /> All files encrypted at rest with AES-256
         </p>
       </div>
+
+      {/* Proof of Ownership Package — Section 11 */}
+      <ProofOfOwnership />
 
       {/* Category filter */}
       <div className="flex items-center gap-2 overflow-x-auto pb-1">

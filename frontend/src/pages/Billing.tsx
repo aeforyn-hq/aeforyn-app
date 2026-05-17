@@ -11,12 +11,9 @@ import { useAuthStore } from '@/store/authStore'
 import { toast } from '@/store/toastStore'
 import { cn } from '@/lib/utils'
 
-type Currency = 'USD' | 'ZAR'
-
 interface Plan {
-  id: 'free' | 'standard' | 'pro'
+  id: 'free' | 'creator' | 'pro' | 'agency'
   name: string
-  usdPrice: number
   zarPrice: number
   description: string
   highlights: string[]
@@ -30,32 +27,37 @@ const PLANS: Plan[] = [
   {
     id: 'free',
     name: 'Free',
-    usdPrice: 0,
     zarPrice: 0,
     description: 'Try AEFORYN — basic protection for new creators',
-    highlights: ['3 platforms monitored', 'Basic threat alerts', '5 phishing scans/month', '1 GB vault storage'],
+    highlights: ['1 platform monitored', 'Basic threat alerts', '5 phishing scans/month', '1 GB vault storage'],
     cta: 'Get Started Free',
   },
   {
-    id: 'standard',
-    name: 'Standard',
-    usdPrice: 29,
-    zarPrice: 529,
-    description: 'Solo creators and freelancers levelling up',
-    highlights: ['10 platforms monitored', 'Advanced threat alerts', '50 phishing scans/month', '25 GB vault storage', 'Recovery playbooks', 'Impersonation monitoring + email alerts'],
-    cta: 'Upgrade to Standard',
+    id: 'creator',
+    name: 'Creator',
+    zarPrice: 149,
+    description: 'Solo creators levelling up their security',
+    highlights: ['5 platforms monitored', 'Advanced threat alerts', '50 phishing scans/month', '25 GB vault storage', 'Recovery playbooks', 'AI Assistant', 'One-Click Damage Containment', 'Impersonation monitoring + alerts'],
+    cta: 'Upgrade to Creator',
   },
   {
     id: 'pro',
     name: 'Pro',
-    usdPrice: 49,
-    zarPrice: 899,
+    zarPrice: 349,
     description: 'Full-time creators who depend on their brand',
-    highlights: ['Unlimited platforms', 'Real-time threat alerts', 'Unlimited phishing scans', '100 GB vault storage', 'AI assistant + resolution guide', 'Recovery playbooks', 'Priority support', 'Full impersonation detection + takedown tools'],
+    highlights: ['Unlimited platforms', 'Real-time threat alerts', 'Unlimited phishing scans', '100 GB vault storage', 'AI Assistant + resolution guide', 'Recovery playbooks', 'One-Click Damage Containment', 'Proof of Ownership Package', 'Full impersonation detection + takedown tools', 'Shared Access (VA/editor)', 'Priority support'],
     badge: 'Most Popular',
     mostPopular: true,
     isGold: true,
     cta: 'Upgrade to Pro',
+  },
+  {
+    id: 'agency',
+    name: 'Agency',
+    zarPrice: 1499,
+    description: 'Agencies and talent managers protecting multiple creators',
+    highlights: ['Everything in Pro', 'Multi-creator dashboard', 'Unlimited team seats', 'White-label reports', 'Dedicated account manager', 'Priority SLA support'],
+    cta: 'Contact Sales',
   },
 ]
 
@@ -64,20 +66,25 @@ type FeatureValue = string | boolean
 interface FeatureRow {
   label: string
   free: FeatureValue
-  standard: FeatureValue
+  creator: FeatureValue
   pro: FeatureValue
+  agency: FeatureValue
 }
 
 const FEATURE_TABLE: FeatureRow[] = [
-  { label: 'Platforms monitored', free: '3', standard: '10', pro: 'Unlimited' },
-  { label: 'Threat alerts', free: 'Basic', standard: 'Advanced', pro: 'Real-time' },
-  { label: 'Phishing scanner', free: '5/month', standard: '50/month', pro: 'Unlimited' },
-  { label: 'Vault storage', free: '1 GB', standard: '25 GB', pro: '100 GB' },
-  { label: 'AI assistant', free: false, standard: false, pro: true },
-  { label: 'AI resolution guide', free: false, standard: false, pro: true },
-  { label: 'Recovery playbooks', free: false, standard: true, pro: true },
-  { label: 'Priority support', free: false, standard: false, pro: true },
-  { label: 'Account impersonation detection', free: false, standard: 'Monitor only', pro: 'Full detection' },
+  { label: 'Platforms monitored',           free: '1',           creator: '5',              pro: 'Unlimited',      agency: 'Unlimited'       },
+  { label: 'Threat alerts',                 free: 'Basic',       creator: 'Advanced',       pro: 'Real-time',      agency: 'Real-time'       },
+  { label: 'Phishing scanner',              free: '5/month',     creator: '50/month',       pro: 'Unlimited',      agency: 'Unlimited'       },
+  { label: 'Vault storage',                 free: '1 GB',        creator: '25 GB',          pro: '100 GB',         agency: '500 GB'          },
+  { label: 'Recovery playbooks',            free: false,         creator: true,             pro: true,             agency: true              },
+  { label: 'AI Assistant',                  free: false,         creator: 'Standard',       pro: 'Full + guide',   agency: 'Full + guide'    },
+  { label: 'One-Click Damage Containment',  free: false,         creator: true,             pro: true,             agency: true              },
+  { label: 'Impersonation monitoring',      free: false,         creator: 'Monitor + alert',pro: 'Full detection', agency: 'Full detection'  },
+  { label: 'Proof of Ownership Package',    free: false,         creator: false,            pro: true,             agency: true              },
+  { label: 'Shared Access (VA/editor)',      free: false,         creator: false,            pro: true,             agency: true              },
+  { label: 'Multi-creator dashboard',       free: false,         creator: false,            pro: false,            agency: true              },
+  { label: 'White-label reports',           free: false,         creator: false,            pro: false,            agency: true              },
+  { label: 'Priority support',              free: false,         creator: false,            pro: true,             agency: 'Dedicated manager'},
 ]
 
 const DIFFERENTIATORS = [
@@ -120,7 +127,6 @@ function FeatureCell({ value }: { value: FeatureValue }) {
 }
 
 export default function Billing() {
-  const [currency, setCurrency] = useState<Currency>('USD')
   const [cancelOpen, setCancelOpen] = useState(false)
   const [upgrading, setUpgrading] = useState<string | null>(null)
   const [whyOpen, setWhyOpen] = useState(false)
@@ -153,8 +159,8 @@ export default function Billing() {
     }
   }
 
-  const handlePaystack = (plan: 'standard' | 'pro') => {
-    void plan
+  const handlePaystack = (planId: string) => {
+    void planId
     toast.info('Paystack coming soon', 'ZAR billing via Paystack will be available soon.')
   }
 
@@ -168,9 +174,6 @@ export default function Billing() {
   }
 
   const formatPrice = (plan: Plan) => {
-    if (currency === 'USD') {
-      return plan.usdPrice === 0 ? '$0' : `$${plan.usdPrice}`
-    }
     return plan.zarPrice === 0 ? 'R0' : `R${plan.zarPrice}`
   }
 
@@ -199,31 +202,8 @@ export default function Billing() {
 
       {/* Pricing section */}
       <div>
-        {/* Currency toggle */}
-        <div className="flex items-center justify-end mb-6">
-          <div
-            className="flex items-center rounded-full p-1 gap-1"
-            style={{ background: '#0A2422', border: '1px solid rgba(201,168,76,0.2)' }}
-          >
-            {(['USD', 'ZAR'] as Currency[]).map((c) => (
-              <button
-                key={c}
-                onClick={() => setCurrency(c)}
-                className="px-4 py-1.5 rounded-full text-xs font-semibold transition-all duration-200"
-                style={
-                  currency === c
-                    ? { background: '#C9A84C', color: '#071E1C' }
-                    : { color: 'rgba(201,168,76,0.6)', background: 'transparent' }
-                }
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-        </div>
-
         {/* Plan cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-5">
           {PLANS.map((plan, i) => {
             const isCurrent = plan.id === currentPlan
 
@@ -296,11 +276,11 @@ export default function Billing() {
                     >
                       {formatPrice(plan)}
                     </span>
-                    {plan.usdPrice > 0 && (
+                    {plan.zarPrice > 0 && (
                       <span className="text-text-secondary text-sm">/mo</span>
                     )}
                   </div>
-                  {plan.usdPrice === 0 && (
+                  {plan.zarPrice === 0 && (
                     <p className="text-xs text-text-secondary mt-1">Forever free</p>
                   )}
                   <p className="text-xs text-text-secondary mt-2">{plan.description}</p>
@@ -337,16 +317,16 @@ export default function Billing() {
                   >
                     {plan.cta}
                   </button>
-                ) : currency === 'ZAR' ? (
+                ) : plan.id === 'agency' ? (
                   <button
-                    onClick={() => handlePaystack(plan.id as 'standard' | 'pro')}
+                    onClick={() => window.open('mailto:hello@aeforyn.com?subject=Agency Plan Enquiry', '_blank')}
                     className={cn('w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200', 'btn-primary')}
                   >
-                    Pay with Paystack
+                    {plan.cta}
                   </button>
                 ) : (
                   <button
-                    onClick={() => handleUpgrade(plan.id)}
+                    onClick={() => handlePaystack(plan.id)}
                     disabled={upgrading === plan.id}
                     className={cn('w-full py-3 px-4 rounded-xl text-sm font-semibold transition-all duration-200', 'btn-primary')}
                   >
@@ -356,7 +336,7 @@ export default function Billing() {
                         Loading…
                       </span>
                     ) : (
-                      `Pay with Stripe`
+                      plan.cta
                     )}
                   </button>
                 )}
@@ -557,8 +537,9 @@ export default function Billing() {
                     </span>
                   </td>
                   <td className="px-4 py-3.5"><FeatureCell value={row.free} /></td>
-                  <td className="px-4 py-3.5"><FeatureCell value={row.standard} /></td>
+                  <td className="px-4 py-3.5"><FeatureCell value={row.creator} /></td>
                   <td className="px-4 py-3.5"><FeatureCell value={row.pro} /></td>
+                  <td className="px-4 py-3.5"><FeatureCell value={row.agency} /></td>
                 </tr>
               ))}
             </tbody>
