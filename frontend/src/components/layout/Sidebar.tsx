@@ -9,8 +9,7 @@ import {
 import { useAuthStore } from '@/store/authStore'
 import { AeforynLogo } from '@/components/ui/AeforynLogo'
 import { PlanBadge } from '@/components/ui/Badge'
-import { AvatarDisplay } from '@/components/ui/AvatarSVG'
-import type { AvatarId } from '@/components/ui/AvatarSVG'
+import { AvatarOrInitials } from '@/components/layout/TopBar'
 import { cn } from '@/lib/utils'
 
 const NAV_ITEMS = [
@@ -36,19 +35,22 @@ const PRO_DESCRIPTIONS: Record<string, string> = {
 }
 
 export function Sidebar() {
-  const { user, logout } = useAuthStore()
+  const { user, logout, avatarUrl } = useAuthStore()
   const navigate = useNavigate()
   const [proTooltip, setProTooltip] = useState<string | null>(null)
 
-  const isPro = user?.plan_tier === 'pro' || user?.plan_tier === 'enterprise'
+  const isPro = user?.plan_tier === 'pro' || user?.plan_tier === 'enterprise' || user?.plan_tier === 'agency'
 
   const handleLogout = () => {
     logout()
     navigate('/login')
   }
 
-  const initials = user?.email?.slice(0, 2).toUpperCase() || 'AE'
-  const avatarId = ((user as { avatar?: string })?.avatar as AvatarId) || null
+  const handle = user?.creator_handle || ''
+  const parts = handle.replace('@', '').split(/[\s_-]/).filter(Boolean)
+  const initials = parts.length >= 2
+    ? (parts[0][0] + parts[1][0]).toUpperCase()
+    : (user?.email?.charAt(0) || 'A').toUpperCase()
 
   return (
     <aside
@@ -60,46 +62,19 @@ export function Sidebar() {
         <AeforynLogo size="md" showWordmark showTagline clickable />
       </div>
 
-      {/* User chip */}
-      <div className="px-4 py-4 border-b" style={{ borderColor: 'rgba(45,212,191,0.08)' }}>
-        <div
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
-          style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.12)' }}
-        >
-          {avatarId ? (
-            <AvatarDisplay id={avatarId} size={32} />
-          ) : (
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
-              style={{ background: 'linear-gradient(135deg, #C9A84C, #9A7A35)', color: '#071E1C' }}
-            >
-              {initials}
-            </div>
-          )}
-          <div className="min-w-0 flex-1">
-            <p className="text-xs font-medium text-text-primary truncate">
-              {user?.creator_handle || user?.email?.split('@')[0] || 'Creator'}
-            </p>
-            <PlanBadge plan={user?.plan_tier || 'free'} className="mt-0.5" />
-          </div>
-        </div>
-      </div>
-
       {/* Main nav */}
-      <nav className="flex-1 px-3 py-4 overflow-y-auto space-y-0.5">
+      <nav className="flex-1 px-3 overflow-y-auto space-y-0.5" style={{ paddingTop: '28px' }}>
         {NAV_ITEMS.map(({ to, icon: Icon, label, proOnly, premium }) => {
           const isLocked = proOnly && !isPro
           return (
-            <div key={to}>
+            <div key={to} style={{ margin: '3px 8px' }}>
               <NavLink
                 to={to}
                 className={({ isActive }) =>
                   cn(
                     'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group relative',
                     premium
-                      ? isActive
-                        ? ''
-                        : ''
+                      ? ''
                       : isActive
                         ? 'text-gold bg-gold-subtle border-l-2 border-gold pl-[10px]'
                         : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
@@ -118,7 +93,6 @@ export function Sidebar() {
                 {({ isActive }) => (
                   <>
                     {premium ? (
-                      /* Pulsating hex icon — gold for premium */
                       <div className="relative w-6 h-6 flex-shrink-0">
                         <motion.div
                           className="absolute inset-0"
@@ -141,7 +115,6 @@ export function Sidebar() {
                       <Icon className={cn('w-4 h-4 flex-shrink-0 transition-colors', isActive ? 'text-gold' : 'text-text-secondary group-hover:text-text-primary')} />
                     )}
 
-                    {/* Label — bright teal metallic for premium */}
                     <span
                       className="flex-1"
                       style={premium ? {
@@ -157,7 +130,6 @@ export function Sidebar() {
                       {label}
                     </span>
 
-                    {/* Gold glowing bottom border for premium */}
                     {premium && (
                       <motion.div
                         className="absolute bottom-0 left-2 right-2 h-[2px] rounded-full"
@@ -184,21 +156,15 @@ export function Sidebar() {
                 )}
               </NavLink>
 
-              {/* Pro tooltip */}
               {isLocked && proTooltip === to && (
                 <div
-                  className="mx-2 mt-1 mb-1 p-3 rounded-xl relative"
+                  className="mt-1 mb-1 p-3 rounded-xl relative"
                   style={{ background: 'rgba(201,168,76,0.08)', border: '1px solid rgba(201,168,76,0.2)' }}
                 >
-                  <button
-                    onClick={() => setProTooltip(null)}
-                    className="absolute top-2 right-2 text-text-secondary hover:text-text-primary"
-                  >
+                  <button onClick={() => setProTooltip(null)} className="absolute top-2 right-2 text-text-secondary hover:text-text-primary">
                     <X className="w-3 h-3" />
                   </button>
-                  <p className="text-xs text-text-secondary leading-relaxed pr-4">
-                    {PRO_DESCRIPTIONS[to]}
-                  </p>
+                  <p className="text-xs text-text-secondary leading-relaxed pr-4">{PRO_DESCRIPTIONS[to]}</p>
                   <button
                     onClick={() => { navigate('/billing'); setProTooltip(null) }}
                     className="mt-2 w-full text-xs py-1.5 px-3 rounded-lg font-semibold transition-colors"
@@ -213,36 +179,54 @@ export function Sidebar() {
         })}
       </nav>
 
-      {/* Bottom nav */}
-      <div className="px-3 py-3 border-t space-y-0.5" style={{ borderColor: 'rgba(45,212,191,0.08)' }}>
-        {BOTTOM_NAV.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            className={({ isActive }) =>
-              cn(
-                'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group',
-                isActive
-                  ? 'text-gold bg-gold-subtle border-l-2 border-gold pl-[10px]'
-                  : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
-              )
-            }
+      {/* Bottom section */}
+      <div className="border-t" style={{ borderColor: 'rgba(45,212,191,0.08)' }}>
+        <div className="px-3 py-3 space-y-0.5">
+          {BOTTOM_NAV.map(({ to, icon: Icon, label }) => (
+            <NavLink
+              key={to}
+              to={to}
+              className={({ isActive }) =>
+                cn(
+                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150 group',
+                  isActive
+                    ? 'text-gold bg-gold-subtle border-l-2 border-gold pl-[10px]'
+                    : 'text-text-secondary hover:text-text-primary hover:bg-white/5'
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <Icon className={cn('w-4 h-4 flex-shrink-0', isActive ? 'text-gold' : 'text-text-secondary group-hover:text-text-primary')} />
+                  <span>{label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-text-secondary hover:text-threat hover:bg-threat/5 transition-all duration-150"
           >
-            {({ isActive }) => (
-              <>
-                <Icon className={cn('w-4 h-4 flex-shrink-0', isActive ? 'text-gold' : 'text-text-secondary group-hover:text-text-primary')} />
-                <span>{label}</span>
-              </>
-            )}
-          </NavLink>
-        ))}
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-text-secondary hover:text-threat hover:bg-threat/5 transition-all duration-150"
-        >
-          <LogOut className="w-4 h-4 flex-shrink-0" />
-          <span>Log out</span>
-        </button>
+            <LogOut className="w-4 h-4 flex-shrink-0" />
+            <span>Log out</span>
+          </button>
+        </div>
+
+        {/* Bottom user row */}
+        <div className="px-4 py-3 border-t" style={{ borderColor: 'rgba(45,212,191,0.08)' }}>
+          <div
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl"
+            style={{ background: 'rgba(201,168,76,0.06)', border: '1px solid rgba(201,168,76,0.12)' }}
+          >
+            <AvatarOrInitials avatarUrl={avatarUrl} initials={initials} size={32} />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-medium text-text-primary truncate">
+                {user?.creator_handle || user?.email?.split('@')[0] || 'Creator'}
+              </p>
+              <PlanBadge plan={user?.plan_tier || 'free'} className="mt-0.5" />
+            </div>
+          </div>
+        </div>
       </div>
     </aside>
   )
